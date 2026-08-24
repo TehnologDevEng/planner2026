@@ -322,6 +322,16 @@
         .list-item .star { cursor: pointer; color: var(--text-muted); font-size: 1.2rem; padding: 6px; }
         .list-item .star.active { color: #f1c40f; }
 
+        .move-to-day-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 6px;
+        }
+        .move-to-day-btn:hover { color: var(--accent-purple); }
+
         .add-btn {
             background: var(--accent-purple);
             color: #fff;
@@ -701,6 +711,16 @@
         }
         .modal-calendar-container .calendar-header { margin-bottom: 10px; }
 
+        /* Показывать кнопки добавления на десктопе, скрывать на мобильных */
+        .desktop-add-btn {
+            display: none;
+        }
+        @media (min-width: 601px) {
+            .desktop-add-btn {
+                display: inline-flex;
+            }
+        }
+
         @media (max-width: 600px) {
             body { padding: 0; }
             .app-controls {
@@ -748,7 +768,7 @@
             .dashboard-block { padding: 12px; }
             .bottom-sheet-options { grid-template-columns: 1fr 1fr; }
             .modal-content { padding: 15px; }
-            .delete-btn, .star { font-size: 1.4rem; padding: 8px; }
+            .delete-btn, .star, .move-to-day-btn { font-size: 1.4rem; padding: 8px; }
         }
 
         @media (min-width: 601px) {
@@ -820,22 +840,27 @@
                         <div class="planner-block" style="border:1px solid var(--border-color); border-radius:8px; padding:12px;">
                             <div class="block-title" style="font-weight:bold; margin-bottom:8px;">ЗАДАЧИ ДНЯ</div>
                             <div id="dayTasksList" class="list-container"></div>
+                            <button class="add-btn desktop-add-btn" onclick="addDayTask('tasks')"><i class="fa-solid fa-plus"></i> Добавить</button>
                         </div>
                         <div class="planner-block" style="border:1px solid var(--border-color); border-radius:8px; padding:12px;">
                             <div class="block-title" style="font-weight:bold; margin-bottom:8px;">ГЛАВНЫЙ ФОКУС</div>
                             <div id="focusList" class="list-container"></div>
+                            <button class="add-btn desktop-add-btn" onclick="addDayTask('focus')"><i class="fa-solid fa-plus"></i> Добавить</button>
                         </div>
                         <div class="planner-block" style="border:1px solid var(--border-color); border-radius:8px; padding:12px;">
                             <div class="block-title" style="font-weight:bold; margin-bottom:8px;">ЗВОНКИ И ПИСЬМА</div>
                             <div id="callsList" class="list-container"></div>
+                            <button class="add-btn desktop-add-btn" onclick="addDayTask('calls')"><i class="fa-solid fa-plus"></i> Добавить</button>
                         </div>
                         <div class="planner-block" style="border:1px solid var(--border-color); border-radius:8px; padding:12px;">
                             <div class="block-title" style="font-weight:bold; margin-bottom:8px;">ТРЕКЕР ПРИВЫЧЕК</div>
                             <div id="habitsList" class="list-container"></div>
+                            <button class="add-btn desktop-add-btn" onclick="addDayTask('habits')"><i class="fa-solid fa-plus"></i> Добавить</button>
                         </div>
                         <div class="planner-block" style="border:1px solid var(--border-color); border-radius:8px; padding:12px;">
                             <div class="block-title" style="font-weight:bold; margin-bottom:8px;">НЕ ЗАБЫТЬ</div>
                             <div id="personalList" class="list-container"></div>
+                            <button class="add-btn desktop-add-btn" onclick="addDayTask('personal')"><i class="fa-solid fa-plus"></i> Добавить</button>
                         </div>
                     </div>
                 </div>
@@ -843,7 +868,7 @@
                 <!-- Страница "Дашборд" -->
                 <div class="planner-page" id="pageDashboard">
                     <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
-                        <h2 style="font-family:var(--font-heading);">Дашборд дня</h2>
+                        <h2 style="font-family:var(--font-heading);" id="dashboardDateTitle">Дашборд дня</h2>
                         <div class="quick-buttons">
                             <button onclick="changeDay(-1)">Вчера</button>
                             <button onclick="changeDay(0)">Сегодня</button>
@@ -1070,7 +1095,6 @@
             document.querySelectorAll('.bottom-nav-item').forEach(b => {
                 b.classList.toggle('active', b.dataset.page === page);
             });
-            // Убран автоматический вызов getWeather(true), чтобы геолокация запрашивалась только по нажатию кнопки
             if (page === 'dashboard') {
                 renderDashboard();
             }
@@ -1260,6 +1284,7 @@
                     <span class="star ${task.important ? 'active' : ''}" onclick="toggleImportant(${realIdx})"><i class="fa-solid fa-star"></i></span>
                     <span class="category-tag">${task.category || '—'}</span>
                     <input type="text" value="${task.text}" onchange="updateInboxText(${realIdx}, this.value)">
+                    <button class="move-to-day-btn" onclick="moveToToday(${realIdx})" title="Перенести в выбранный день"><i class="fa-solid fa-calendar-plus"></i></button>
                     <button class="delete-btn" onclick="deleteInboxTask(${realIdx})"><i class="fa-solid fa-xmark"></i></button>
                 `;
                 list.appendChild(div);
@@ -1293,6 +1318,13 @@
             masterTasks.splice(idx, 1);
             renderInbox();
             saveState();
+        }
+        // Новая функция переноса задачи из инбокса в задачи выбранного дня
+        function moveToToday(idx) {
+            const task = masterTasks.splice(idx, 1)[0];
+            const dayData = getDateData(dailyDate);
+            dayData.tasks.push({ text: task.text, checked: false });
+            renderAll();
         }
         function updateMasterFromDOM() {
             const items = document.querySelectorAll('#inboxList .list-item');
@@ -1391,6 +1423,11 @@
             const container = document.getElementById('dashboardContent');
             if (!container) return;
             const dayData = getDateData(dailyDate);
+            // Обновляем заголовок даты на дашборде
+            const dashboardTitle = document.getElementById('dashboardDateTitle');
+            if (dashboardTitle) {
+                dashboardTitle.textContent = `Дашборд: ${dailyDate.getDate()} ${MONTHS_FULL_RU[dailyDate.getMonth()]} ${dailyDate.getFullYear()}`;
+            }
             container.innerHTML = '';
             const topBlock = document.createElement('div');
             topBlock.className = 'weather-quote-grid';
