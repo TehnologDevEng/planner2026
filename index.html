@@ -516,7 +516,6 @@
 
         /* ========== НОВЫЕ КОМПОНЕНТЫ ========== */
 
-        /* Бургер-меню */
         .burger-btn {
             background: none;
             border: none;
@@ -562,7 +561,6 @@
         }
         .mobile-menu button:hover { background: rgba(255,255,255,0.1); }
 
-        /* Нижняя навигация */
         .bottom-nav {
             display: none;
             position: fixed;
@@ -601,7 +599,6 @@
         .bottom-nav-item.active { color: #fff; }
         .bottom-nav-item.active i { color: #fff; }
 
-        /* FAB */
         .fab-btn {
             display: none;
             position: fixed;
@@ -621,7 +618,6 @@
         }
         .fab-btn:active { transform: scale(0.9); }
 
-        /* Bottom sheet для выбора блока */
         .bottom-sheet-overlay {
             position: fixed;
             top: 0;
@@ -670,7 +666,6 @@
         }
         .bottom-sheet-option:hover { background: var(--accent-purple); color: #fff; }
 
-        /* Модальное окно календаря */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -706,7 +701,6 @@
         }
         .modal-calendar-container .calendar-header { margin-bottom: 10px; }
 
-        /* Утилиты для мобильных */
         @media (max-width: 600px) {
             body { padding: 0; }
             .app-controls {
@@ -754,13 +748,11 @@
             .dashboard-block { padding: 12px; }
             .bottom-sheet-options { grid-template-columns: 1fr 1fr; }
             .modal-content { padding: 15px; }
-            /* скрываем кнопки в списках на мобильном? */
             .delete-btn, .star { font-size: 1.4rem; padding: 8px; }
         }
 
         @media (min-width: 601px) {
             .bottom-nav, .fab-btn, .burger-btn, .mobile-menu-overlay { display: none; }
-            .inbox-wrapper { display: block; }
         }
     </style>
 </head>
@@ -803,7 +795,7 @@
 
         <div class="planner-workspace">
             <div class="paper-viewport" id="paperViewport">
-                <!-- Страница "Сегодня" (ввод) -->
+                <!-- Страница "Сегодня" -->
                 <div class="planner-page active" id="pageToday">
                     <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
                         <h2 style="font-family:var(--font-heading); margin:0;" id="selectedDateTitle">Данные дня</h2>
@@ -820,7 +812,7 @@
                         <div class="weather-icon" id="weatherIcon">🌤</div>
                         <div class="weather-info">
                             <div class="weather-temp" id="weatherTemp">—</div>
-                            <div class="weather-desc" id="weatherDesc">Погода не определена</div>
+                            <div class="weather-desc" id="weatherDesc">Нажмите 🔄, чтобы обновить</div>
                         </div>
                         <button class="weather-update-btn" onclick="getWeather(false)" title="Обновить погоду"><i class="fa-solid fa-rotate"></i></button>
                     </div>
@@ -927,8 +919,6 @@
             <button class="bottom-nav-item" data-page="inbox"><i class="fa-solid fa-inbox"></i><span>Инбокс</span></button>
         </div>
     </div>
-
-    <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
 
     <script>
         // ==================== КОНСТАНТЫ ====================
@@ -1074,20 +1064,14 @@
             currentPage = page;
             document.querySelectorAll('.planner-page').forEach(p => p.classList.remove('active'));
             document.getElementById(page === 'today' ? 'pageToday' : page === 'dashboard' ? 'pageDashboard' : 'pageInbox').classList.add('active');
-            // Обновляем верхние кнопки и нижнюю навигацию
             document.querySelectorAll('.view-btn').forEach(b => {
                 b.classList.toggle('active', b.dataset.view === page);
             });
             document.querySelectorAll('.bottom-nav-item').forEach(b => {
                 b.classList.toggle('active', b.dataset.page === page);
             });
-            // Дополнительные действия при переключении
+            // Убран автоматический вызов getWeather(true), чтобы геолокация запрашивалась только по нажатию кнопки
             if (page === 'dashboard') {
-                const todayKey = formatDateKey(new Date());
-                const selectedKey = formatDateKey(dailyDate);
-                if (todayKey === selectedKey && !getDateData(dailyDate).weather) {
-                    getWeather(true);
-                }
                 renderDashboard();
             }
         }
@@ -1221,7 +1205,6 @@
             renderDayBlocks();
             renderDashboard();
             saveState();
-            // Фокус на новом инпуте
             const containerId = type === 'tasks' ? 'dayTasksList' : type === 'focus' ? 'focusList' : type === 'calls' ? 'callsList' : type === 'habits' ? 'habitsList' : 'personalList';
             const inputs = document.querySelectorAll(`#${containerId} input[type="text"]`);
             if (inputs.length) inputs[inputs.length-1].focus();
@@ -1342,7 +1325,7 @@
                 else icon.textContent = '🌤';
             } else {
                 temp.textContent = '—';
-                desc.textContent = 'Погода не определена';
+                desc.textContent = 'Нажмите 🔄, чтобы обновить';
                 icon.textContent = '🌤';
             }
         }
@@ -1352,6 +1335,7 @@
             if (btn) btn.className = 'fa-solid fa-spinner fa-spin';
             if (!navigator.geolocation) {
                 if (!silent) alert('Геолокация не поддерживается');
+                document.getElementById('weatherDesc').textContent = 'Геолокация не поддерживается';
                 if (btn) btn.className = 'fa-solid fa-rotate';
                 return;
             }
@@ -1382,7 +1366,14 @@
                 renderDashboard();
             } catch(err) {
                 console.warn(err);
-                if (!silent) alert('Не удалось получить погоду. Введите вручную.');
+                let msg = 'Не удалось получить погоду.';
+                if (err.code === 1) {
+                    msg += ' Разрешите доступ к местоположению в настройках Safari (AA → Настройки веб-сайта → Местоположение → Разрешить).';
+                } else {
+                    msg += ' Проверьте подключение к интернету.';
+                }
+                if (!silent) alert(msg);
+                document.getElementById('weatherDesc').textContent = 'Нажмите 🔄, чтобы обновить';
             } finally {
                 if (btn) btn.className = 'fa-solid fa-rotate';
             }
@@ -1410,7 +1401,7 @@
                         <span style="font-size:3rem;">${getWeatherIcon(dayData.weather)}</span>
                         <div style="flex:1;">
                             <div style="font-family:var(--font-heading); font-size:1.8rem; font-weight:700;">${dayData.weather ? dayData.weather.split(',')[0] : '—'}</div>
-                            <div style="font-family:var(--font-handwriting); font-size:1.2rem; color:var(--text-muted);">${dayData.weather ? dayData.weather.split(',')[1]?.trim() || '' : 'Не определена'}</div>
+                            <div style="font-family:var(--font-handwriting); font-size:1.2rem; color:var(--text-muted);">${dayData.weather ? dayData.weather.split(',')[1]?.trim() || '' : 'Нажмите 🔄, чтобы обновить'}</div>
                         </div>
                         <button class="weather-update-btn" onclick="getWeather(false)" title="Обновить погоду"><i class="fa-solid fa-rotate"></i></button>
                     </div>
@@ -1448,7 +1439,6 @@
             container.appendChild(grid);
             renderRandomQuote();
 
-            // Добавляем обработчики для чекбоксов на дашборде
             document.querySelectorAll('#dashboardContent .custom-checkbox').forEach((cb, idx) => {
                 cb.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -1512,7 +1502,6 @@
             addDayTask(type);
         }
 
-        // Мобильное меню
         const burgerBtn = document.getElementById('burgerBtn');
         const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
         burgerBtn.addEventListener('click', function() {
@@ -1537,11 +1526,7 @@
             const deltaX = e.changedTouches[0].clientX - touchStartX;
             const deltaY = e.changedTouches[0].clientY - touchStartY;
             if (Math.abs(deltaX) > 80 && Math.abs(deltaY) < 40) {
-                if (currentPage === 'today') {
-                    if (deltaX < 0) changeDay(1);
-                    else changeDay(-1);
-                } else if (currentPage === 'dashboard') {
-                    // На дашборде свайп тоже меняет день
+                if (currentPage === 'today' || currentPage === 'dashboard') {
                     if (deltaX < 0) changeDay(1);
                     else changeDay(-1);
                 }
