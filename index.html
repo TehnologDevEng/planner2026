@@ -8,7 +8,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap&subset=cyrillic,cyrillic-ext" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <style>
+        /* ===== ТЕМЫ ===== */
         :root {
             --bg-canvas: #282633;
             --tablet-bezel: #1b1a22;
@@ -19,12 +21,15 @@
             --text-muted: #72707e;
             --accent-purple: #5c527f;
             --border-color: #d1cbd5;
+            --card-bg: #ffffff;
+            --block-bg: #eee8dc;
+            --shadow-color: rgba(0,0,0,0.65);
+            --input-bg: rgba(255,255,255,0.85);
+            --tab-bg: #18171f;
+            --topbar-bg: #272533;
             --font-handwriting: 'Caveat', cursive;
             --font-ui: 'Inter', sans-serif;
             --font-heading: 'Montserrat', sans-serif;
-            --tab-home: #3c3a4f;
-            --tab-2026: #4a4765;
-            --tab-2027: #5b587a;
             --tab-jan: #3e88a5;
             --tab-feb: #54a1be;
             --tab-mar: #5b9279;
@@ -38,6 +43,37 @@
             --tab-nov: #6e2f54;
             --tab-dec: #2d4263;
         }
+
+        [data-theme="dark"] {
+            --bg-canvas: #1a1a1e;
+            --tablet-bezel: #121217;
+            --paper-bg: #1e1e24;
+            --paper-grid: #2a2a32;
+            --paper-line: #33333d;
+            --text-dark: #e8e6e0;
+            --text-muted: #9a97a8;
+            --accent-purple: #7a6f9e;
+            --border-color: #3d3a48;
+            --card-bg: #26262e;
+            --block-bg: #2d2a38;
+            --shadow-color: rgba(0,0,0,0.85);
+            --input-bg: rgba(40,40,50,0.85);
+            --tab-bg: #0e0e12;
+            --topbar-bg: #1a1a22;
+            --tab-jan: #2e7080;
+            --tab-feb: #3e8a9a;
+            --tab-mar: #4a7a62;
+            --tab-apr: #5a8030;
+            --tab-may: #6a8a2a;
+            --tab-jun: #b86a20;
+            --tab-jul: #b04a3a;
+            --tab-aug: #b87a20;
+            --tab-sep: #9a2a2a;
+            --tab-oct: #7a2a4a;
+            --tab-nov: #5a2a4a;
+            --tab-dec: #2a3a5a;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
         body {
             background-color: var(--bg-canvas);
@@ -51,80 +87,78 @@
             padding: 12px;
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
+            transition: background 0.3s, color 0.3s;
         }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .todo-row { animation: fadeInUp 0.3s ease; }
+        .custom-checkbox { transition: all 0.2s ease; }
+        .nav-tab { transition: all 0.25s ease; }
+
         .app-controls {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            max-width: 1320px;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            padding: 10px 18px;
-            border-radius: 16px;
-            margin-bottom: 14px;
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            flex-wrap: wrap;
-            gap: 8px;
+            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; max-width: 1320px;
+            background: rgba(255,255,255,0.08); backdrop-filter: blur(14px);
+            padding: 10px 18px; border-radius: 16px; margin-bottom: 14px; color: #fff;
+            border: 1px solid rgba(255,255,255,0.12); flex-wrap: wrap; gap: 8px;
+            transition: background 0.3s;
         }
-        .app-controls .brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-heading); font-weight: 700; font-size: 1.2rem; letter-spacing: 0.5px; }
-        .view-switchers { display: flex; background: rgba(0, 0, 0, 0.35); padding: 4px; border-radius: 12px; gap: 4px; flex-wrap: wrap; }
+        .brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-heading); font-weight: 700; font-size: 1.2rem; }
+        .view-switchers { display: flex; background: rgba(0,0,0,0.35); padding: 4px; border-radius: 12px; gap: 4px; flex-wrap: wrap; }
         .view-btn {
             background: transparent; border: none; color: #d0cee0; padding: 10px 18px; border-radius: 10px;
-            font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease;
+            font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
             display: flex; align-items: center; gap: 8px; font-family: var(--font-ui);
         }
-        .view-btn.active, .view-btn:hover { background: #ffffff; color: #1a1924; box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+        .view-btn.active, .view-btn:hover { background: #fff; color: #1a1924; box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+        [data-theme="dark"] .view-btn.active, [data-theme="dark"] .view-btn:hover { background: var(--accent-purple); color: #fff; }
         .tool-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .btn-action {
-            background: rgba(255, 255, 255, 0.14); border: none; color: #fff; padding: 10px 16px; border-radius: 10px;
+            background: rgba(255,255,255,0.14); border: none; color: #fff; padding: 10px 16px; border-radius: 10px;
             cursor: pointer; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 6px;
             font-family: var(--font-ui); transition: background 0.2s;
         }
-        .btn-action:hover { background: rgba(255, 255, 255, 0.24); }
+        .btn-action:hover { background: rgba(255,255,255,0.24); }
         .btn-action:active { transform: scale(0.96); }
 
         .tablet-container {
             position: relative; width: 100%; max-width: 1320px; background-color: var(--tablet-bezel);
-            border-radius: 34px; padding: 14px; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65), inset 0 0 0 2px rgba(255, 255, 255, 0.1);
+            border-radius: 34px; padding: 14px; box-shadow: 0 25px 60px var(--shadow-color), inset 0 0 0 2px rgba(255,255,255,0.1);
             display: flex; flex-direction: column; overflow: hidden;
+            transition: background 0.3s, box-shadow 0.3s;
         }
         .tablet-top-bar {
-            min-height: 50px; background: #272533; border-radius: 20px 20px 0 0; display: flex; align-items: center;
+            min-height: 50px; background: var(--topbar-bg); border-radius: 20px 20px 0 0; display: flex; align-items: center;
             justify-content: space-between; padding: 0 18px; color: #c5c3d0; font-size: 0.9rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06); flex-wrap: wrap; gap: 6px;
+            border-bottom: 1px solid rgba(255,255,255,0.06); flex-wrap: wrap; gap: 6px;
+            transition: background 0.3s;
         }
         .tablet-nav-icons { display: flex; align-items: center; gap: 18px; font-size: 1.1rem; }
         .tablet-nav-icons i { cursor: pointer; transition: color 0.2s; padding: 6px; }
         .tablet-nav-icons i:hover { color: #fff; }
-        .drawing-tools {
-            display: flex; align-items: center; gap: 12px; background: rgba(0, 0, 0, 0.3);
-            padding: 4px 14px; border-radius: 20px; flex-wrap: wrap;
-        }
-        .tool-icon { cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.2s; font-size: 1.0rem; }
-        .tool-icon.active { background: var(--accent-purple); color: #fff; }
-        .color-swatch { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
-        .color-swatch.active { border-color: #fff; transform: scale(1.18); }
 
-        .planner-workspace { display: flex; background: #201f29; border-radius: 0 0 20px 20px; overflow: hidden; min-height: 760px; }
-        .paper-viewport { flex: 1; background: var(--paper-bg); position: relative; overflow-y: auto; max-height: 850px; box-shadow: inset 0 0 12px rgba(0,0,0,0.06); }
-        #drawingCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
-        #drawingCanvas.drawing-active { pointer-events: auto; cursor: crosshair; }
+        .planner-workspace { display: flex; background: #201f29; border-radius: 0 0 20px 20px; overflow: hidden; min-height: 760px; transition: background 0.3s; }
+        [data-theme="dark"] .planner-workspace { background: #14141a; }
+        .paper-viewport {
+            flex: 1; background: var(--paper-bg); position: relative; overflow-y: auto;
+            max-height: 850px; box-shadow: inset 0 0 12px rgba(0,0,0,0.06);
+            transition: background 0.3s;
+        }
 
         .tabs-sidebar {
-            width: 56px; background: #18171f; display: flex; flex-direction: column; gap: 2px; padding: 8px 0;
+            width: 56px; background: var(--tab-bg); display: flex; flex-direction: column; gap: 2px; padding: 8px 0;
+            transition: background 0.3s;
         }
         .nav-tab {
-            width: 100%; height: 50px; display: flex; align-items: center; justify-content: center; color: #ffffff;
+            width: 100%; height: 50px; display: flex; align-items: center; justify-content: center; color: #fff;
             font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; writing-mode: vertical-rl; text-transform: uppercase;
-            cursor: pointer; border-radius: 8px 0 0 8px; margin-left: 4px; transition: all 0.2s ease;
+            cursor: pointer; border-radius: 8px 0 0 8px; margin-left: 4px; transition: all 0.2s;
             box-shadow: -2px 1px 4px rgba(0,0,0,0.3); opacity: 0.88;
         }
-        .nav-tab:hover, .nav-tab.active { opacity: 1; margin-left: 0px; width: 52px; box-shadow: -4px 2px 8px rgba(0,0,0,0.4); }
-        .nav-tab.tab-home { background: var(--tab-home); writing-mode: horizontal-tb; font-size: 1.0rem; }
-        .nav-tab.tab-2026, .nav-tab.tab-2027 { writing-mode: horizontal-tb; font-size: 0.75rem; }
+        .nav-tab:hover, .nav-tab.active { opacity: 1; margin-left: 0; width: 52px; box-shadow: -4px 2px 8px rgba(0,0,0,0.4); }
         .nav-tab.tab-jan { background: var(--tab-jan); }
         .nav-tab.tab-feb { background: var(--tab-feb); }
         .nav-tab.tab-mar { background: var(--tab-mar); }
@@ -141,116 +175,136 @@
         .planner-page { display: none; padding: 28px 32px; min-height: 100%; position: relative; z-index: 1; }
         .planner-page.active { display: block; }
 
-        .todo-master-container { max-width: 1000px; margin: 0 auto; }
-        .todo-master-header {
-            display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px;
-            border-bottom: 2px solid var(--border-color); padding-bottom: 10px; flex-wrap: wrap; gap: 8px;
+        /* Общие стили для списков */
+        .list-container { display: flex; flex-direction: column; gap: 6px; min-height: 50px; }
+        .list-item {
+            display: flex; align-items: center; gap: 10px; background: var(--card-bg);
+            border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 12px;
+            transition: background 0.3s, border-color 0.3s; cursor: grab;
         }
-        .todo-master-header h1 { font-family: var(--font-heading); font-size: 1.9rem; font-weight: 700; letter-spacing: 2px; color: #433f52; text-transform: uppercase; }
-        .todo-master-header .year-badge { font-family: var(--font-heading); font-size: 1.2rem; font-weight: 700; color: var(--accent-purple); letter-spacing: 1px; }
-
-        .todo-master-table { width: 100%; border-collapse: collapse; font-size: 1.0rem; }
-        .todo-master-table th { text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; color: #656173; padding: 12px 8px; border-bottom: 1.5px solid #b8b3bf; font-weight: 700; }
-        .todo-master-table th.col-tasks { text-align: left; padding-left: 12px; width: 56%; }
-        .todo-master-table th.col-priority { text-align: center; width: 18%; }
-        .todo-master-table th.col-due { text-align: center; width: 26%; }
-        .priority-subheaders { display: flex; justify-content: center; gap: 20px; font-size: 0.8rem; margin-top: 4px; color: #847f91; font-weight: 600; }
-
-        .todo-row { border-bottom: 1px solid var(--paper-line); min-height: 48px; transition: background 0.15s; }
-        .todo-row:hover { background-color: rgba(0, 0, 0, 0.018); }
-        .td-task { display: flex; align-items: center; gap: 12px; padding: 0 8px 0 12px; min-height: 48px; }
-        .task-num { font-family: var(--font-handwriting); font-size: 1.4rem; color: #666; width: 30px; flex-shrink: 0; }
-        .editable-input {
-            width: 100%; border: none; background: transparent; font-family: var(--font-handwriting);
-            font-size: 1.5rem; color: #2b2b36; outline: none; line-height: 1.2;
-            user-select: text; -webkit-user-select: text;
+        .list-item:active { cursor: grabbing; }
+        .list-item .custom-checkbox { width: 20px; height: 20px; border: 2px solid var(--text-muted); border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; background: var(--card-bg); flex-shrink: 0; }
+        .list-item .custom-checkbox.checked { background: #528c61; border-color: #528c61; color: #fff; }
+        .list-item .custom-checkbox.checked::after { content: '\f00c'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 0.8rem; }
+        .list-item input[type="text"] {
+            flex: 1; border: none; background: transparent; font-family: var(--font-handwriting);
+            font-size: 1.4rem; color: var(--text-dark); outline: none;
+            user-select: text; -webkit-user-select: text; transition: color 0.3s;
         }
-        .editable-input:focus { background: rgba(255,255,255,0.85); box-shadow: inset 0 -1px 0 var(--accent-purple); }
+        .list-item .delete-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1rem; }
+        .list-item .delete-btn:hover { color: #c0392b; }
+        .list-item .star { cursor: pointer; color: var(--text-muted); }
+        .list-item .star.active { color: #f1c40f; }
 
-        .custom-checkbox {
-            width: 22px; height: 22px; border: 2px solid #858091; border-radius: 4px;
-            display: flex; align-items: center; justify-content: center; cursor: pointer; background: #fff;
-            flex-shrink: 0; transition: all 0.15s;
+        .add-btn {
+            background: var(--accent-purple); color: #fff; border: none; padding: 8px 16px;
+            border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600;
+            display: inline-flex; align-items: center; gap: 6px; margin-top: 8px;
+            font-family: var(--font-ui);
         }
-        .custom-checkbox.checked { background: #528c61; border-color: #528c61; color: #fff; }
-        .custom-checkbox.checked::after { content: '\f00c'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 0.8rem; }
 
-        .priority-group { display: flex; align-items: center; justify-content: center; gap: 24px; }
-        .p-box { width: 20px; height: 20px; border: 2px solid #9e99a8; border-radius: 3px; cursor: pointer; background: #fff; transition: transform 0.1s; }
-        .p-box:active { transform: scale(0.9); }
-        .p-box.selected-h { background: #d65d5d; border-color: #d65d5d; }
-        .p-box.selected-m { background: #df9732; border-color: #df9732; }
-        .p-box.selected-l { background: #4f9b65; border-color: #4f9b65; }
+        .category-tag { font-size: 0.7rem; padding: 2px 8px; border-radius: 12px; background: var(--block-bg); color: var(--text-muted); font-weight: 600; }
 
-        .due-progress-cell { display: flex; align-items: center; justify-content: space-between; padding: 0 12px; gap: 14px; }
-        .due-date-input { width: 65px; border: none; background: transparent; font-family: var(--font-handwriting); font-size: 1.4rem; text-align: center; color: #333; outline: none; user-select: text; -webkit-user-select: text; }
-        .progress-pill { flex: 1; height: 22px; background: #e2dfd9; border-radius: 11px; overflow: hidden; position: relative; cursor: pointer; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #87809c, #645a7d); width: 0%; border-radius: 11px; transition: width 0.3s ease; }
-
-        .task-actions { display: flex; gap: 8px; align-items: center; margin-left: 4px; }
-        .task-actions button { background: none; border: none; cursor: pointer; color: #999; transition: color 0.2s; font-size: 1.1rem; padding: 4px; }
-        .task-actions button:hover { color: #c0392b; }
-
-        /* Daily spread */
-        .daily-spread-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; min-height: 700px; }
-        .page-column { display: flex; flex-direction: column; gap: 18px; }
-        .daily-date-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; flex-wrap: wrap; gap: 6px; }
-        .date-title-main { font-family: var(--font-heading); font-size: 1.4rem; font-weight: 700; color: #383544; display: flex; align-items: center; gap: 14px; }
-        .date-title-main i { cursor: pointer; transition: transform 0.2s; font-size: 1.4rem; padding: 6px; }
-        .date-title-main i:hover { transform: scale(1.2); }
-
-        .mini-calendar-card { background: #f4f0e9; border: 1px solid #dfd8cc; border-radius: 8px; padding: 12px 16px; }
-        .calendar-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 0.85rem; color: #555; }
-        .calendar-table th { font-weight: 700; padding-bottom: 6px; color: #6a6675; }
-        .calendar-table td { padding: 4px 0; }
-        .calendar-table td.active-day { background: var(--accent-purple); color: #fff; border-radius: 50%; font-weight: 700; }
-
-        .planner-block { border: 1px solid #d6d0c6; border-radius: 8px; background: #fff; overflow: hidden; display: flex; flex-direction: column; }
-        .block-title {
-            background: #eee8dc; padding: 8px 14px; font-size: 0.85rem; font-weight: 700;
-            letter-spacing: 1px; text-transform: uppercase; color: #524d60;
-            border-bottom: 1px solid #ded7cb; text-align: center;
+        .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+        .filter-btn {
+            padding: 6px 16px; border: 2px solid var(--border-color); border-radius: 20px;
+            background: transparent; cursor: pointer; font-size: 0.8rem; font-weight: 600;
+            color: var(--text-muted); transition: all 0.2s; font-family: var(--font-ui);
         }
-        .block-body { padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
-        .schedule-grid { display: flex; flex-direction: column; }
-        .schedule-row { display: flex; align-items: center; border-bottom: 1px solid var(--paper-line); min-height: 36px; }
-        .time-label { width: 60px; font-size: 0.8rem; font-weight: 600; color: #726e7e; border-right: 1px solid var(--paper-line); padding-right: 8px; text-align: right; flex-shrink: 0; line-height: 1.2; }
-        .schedule-input { flex: 1; border: none; background: transparent; font-family: var(--font-handwriting); font-size: 1.35rem; padding-left: 12px; color: #2c2b38; outline: none; user-select: text; -webkit-user-select: text; }
+        .filter-btn.active { background: var(--accent-purple); color: #fff; border-color: var(--accent-purple); }
 
-        .daily-todo-item { display: flex; align-items: center; gap: 12px; border-bottom: 1px dotted #dfd9ce; padding-bottom: 4px; }
-
-        .quad-notes-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 16px; height: 100%; }
-        .note-card-box { border: 1px solid #dbd4ca; border-radius: 8px; background: #fff; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .note-card-title {
-            font-size: 0.8rem; font-weight: 700; color: #635f70; text-transform: uppercase;
-            letter-spacing: 0.5px; border-bottom: 1px solid #eee8dc; padding-bottom: 6px; margin-bottom: 4px;
-            cursor: text; outline: none; user-select: text; -webkit-user-select: text;
+        .calendar-day-indicator { position: relative; }
+        .calendar-day-indicator::after {
+            content: ''; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
+            width: 5px; height: 5px; background: var(--accent-purple); border-radius: 50%;
         }
-        .note-card-title:focus { background: rgba(255,255,200,0.3); }
-        .note-card-box .line-item { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #f2eee6; padding-bottom: 2px; }
-        .line-item input { border: none; background: transparent; width: 100%; font-family: var(--font-handwriting); font-size: 1.25rem; outline: none; color: #2b2b36; user-select: text; -webkit-user-select: text; }
+
+        /* Стили для календаря */
+        .calendar-header {
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            margin-bottom: 8px;
+        }
+        .calendar-header button {
+            background: var(--accent-purple); color: #fff; border: none; border-radius: 6px;
+            padding: 5px 10px; cursor: pointer; font-size: 0.9rem;
+        }
+        .calendar-header button:hover { background: #4b4268; }
+        .calendar-header .month-year {
+            font-family: var(--font-heading); font-weight: 700; font-size: 1.1rem;
+            text-transform: uppercase; letter-spacing: 1px; color: var(--text-dark);
+        }
+        .quick-buttons { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+        .quick-buttons button {
+            background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px;
+            padding: 4px 12px; cursor: pointer; font-size: 0.8rem; font-weight: 600;
+            color: var(--text-dark); transition: all 0.2s; font-family: var(--font-ui);
+        }
+        .quick-buttons button:hover { background: var(--accent-purple); color: #fff; border-color: var(--accent-purple); }
+
+        /* Стили для погоды и цитат */
+        .weather-card {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 16px; margin-bottom: 16px;
+            display: flex; align-items: center; gap: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: background 0.3s, border-color 0.3s;
+        }
+        .weather-icon { font-size: 2.5rem; }
+        .weather-info { flex: 1; }
+        .weather-temp { font-family: var(--font-heading); font-size: 1.8rem; font-weight: 700; }
+        .weather-desc { font-family: var(--font-handwriting); font-size: 1.3rem; color: var(--text-muted); }
+        .weather-update-btn {
+            background: none; border: none; color: var(--text-muted); cursor: pointer;
+            font-size: 1.2rem; padding: 8px; border-radius: 50%; transition: background 0.2s;
+        }
+        .weather-update-btn:hover { background: rgba(0,0,0,0.08); }
+
+        .quote-block {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 16px; margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: background 0.3s, border-color 0.3s;
+        }
+        .quote-text {
+            font-family: var(--font-handwriting); font-size: 1.8rem; line-height: 1.4;
+            color: var(--text-dark); margin-bottom: 8px;
+        }
+        .quote-author { font-family: var(--font-ui); font-size: 0.9rem; color: var(--text-muted); font-style: italic; }
+
+        /* Стили дашборда */
+        .dashboard-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;
+            background: var(--paper-bg); padding: 24px; border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1), inset 0 0 0 1px var(--paper-line);
+        }
+        .dashboard-block { background: var(--card-bg); border-radius: 12px; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .dashboard-block h3 {
+            font-family: var(--font-heading); font-size: 1.1rem; text-transform: uppercase;
+            letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px;
+            border-bottom: 2px solid var(--paper-line); padding-bottom: 6px;
+        }
+        .dashboard-item { display: flex; align-items: center; gap: 10px; padding: 4px 0; }
+        .dashboard-item .custom-checkbox { width: 22px; height: 22px; border: 2px solid var(--text-muted); border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; background: var(--card-bg); flex-shrink: 0; }
+        .dashboard-item .custom-checkbox.checked { background: #528c61; border-color: #528c61; color: #fff; }
+        .dashboard-item .custom-checkbox.checked::after { content: '\f00c'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 0.8rem; }
+
+        .weather-quote-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;
+        }
 
         @media (max-width: 1024px) {
-            .daily-spread-grid { grid-template-columns: 1fr; }
             .paper-viewport { max-height: none; }
             .tabs-sidebar { width: 48px; }
             .nav-tab { height: 44px; font-size: 0.65rem; }
             .planner-page { padding: 18px; }
+            .weather-quote-grid { grid-template-columns: 1fr; }
         }
         @media (max-width: 600px) {
             .app-controls { flex-direction: column; align-items: stretch; }
             .view-switchers { justify-content: center; }
             .tool-actions { justify-content: center; }
             .tablet-top-bar { flex-direction: column; height: auto; padding: 10px; }
-            .drawing-tools { justify-content: center; }
-        }
-        /* iPad Pro оптимизация: крупнее элементы */
-        @media (min-width: 1024px) {
-            .view-btn { padding: 12px 24px; font-size: 1.0rem; }
-            .btn-action { padding: 12px 20px; font-size: 1.0rem; }
-            .editable-input { font-size: 1.6rem; }
-            .todo-master-table th { font-size: 0.9rem; }
-            .date-title-main { font-size: 1.6rem; }
+            .weather-card { flex-direction: column; align-items: flex-start; }
         }
     </style>
 </head>
@@ -258,17 +312,14 @@
     <div class="app-controls">
         <div class="brand"><i class="fa-solid fa-book-open"></i><span>ПЛАНЕР 2026</span></div>
         <div class="view-switchers">
-            <button class="view-btn active" data-view="master-todo"><i class="fa-solid fa-list-check"></i> Список задач</button>
-            <button class="view-btn" data-view="daily-spread"><i class="fa-solid fa-calendar-day"></i> День</button>
+            <button class="view-btn active" data-view="input"><i class="fa-solid fa-pen"></i> Ввод</button>
+            <button class="view-btn" data-view="dashboard"><i class="fa-solid fa-chart-simple"></i> Дашборд</button>
         </div>
         <div class="tool-actions">
-            <button class="btn-action" id="drawModeBtn" onclick="toggleDrawingMode()"><i class="fa-solid fa-pen-nib"></i> Рисование</button>
-            <button class="btn-action" onclick="clearCanvas()"><i class="fa-solid fa-eraser"></i> Очистить</button>
-            <button class="btn-action" onclick="undoCanvas()"><i class="fa-solid fa-arrow-rotate-left"></i> Отменить</button>
+            <button class="btn-action" onclick="toggleTheme()" title="Переключить тему"><i id="themeIcon" class="fa-solid fa-moon"></i></button>
             <button class="btn-action" onclick="exportData()"><i class="fa-solid fa-download"></i> Экспорт</button>
             <button class="btn-action" onclick="document.getElementById('importFile').click()"><i class="fa-solid fa-upload"></i> Импорт</button>
             <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
-            <button class="btn-action" onclick="window.print()"><i class="fa-solid fa-print"></i> Печать</button>
         </div>
     </div>
 
@@ -279,534 +330,662 @@
                 <i class="fa-solid fa-magnifying-glass"></i>
                 <i class="fa-solid fa-bookmark"></i>
             </div>
-            <div class="drawing-tools">
-                <i class="fa-solid fa-pen tool-icon active" id="toolPen" onclick="selectTool('pen')"></i>
-                <i class="fa-solid fa-highlighter tool-icon" id="toolHighlighter" onclick="selectTool('highlighter')"></i>
-                <i class="fa-solid fa-eraser tool-icon" id="toolEraser" onclick="selectTool('eraser')"></i>
-                <span style="width:1px; height:20px; background:#555; margin:0 4px;"></span>
-                <div class="color-swatch active" style="background:#2b2b36;" onclick="selectColor('#2b2b36', this)"></div>
-                <div class="color-swatch" style="background:#366b88;" onclick="selectColor('#366b88', this)"></div>
-                <div class="color-swatch" style="background:#a34343;" onclick="selectColor('#a34343', this)"></div>
-                <div class="color-swatch" style="background:rgba(241, 190, 35, 0.45);" onclick="selectColor('rgba(241, 190, 35, 0.45)', this)"></div>
-            </div>
             <div class="tablet-nav-icons"><i class="fa-solid fa-ellipsis-vertical"></i></div>
         </div>
 
         <div class="planner-workspace">
             <div class="paper-viewport" id="paperViewport">
-                <canvas id="drawingCanvas"></canvas>
-
-                <div class="planner-page active" id="pageMasterTodo">
-                    <div class="todo-master-container">
-                        <div class="todo-master-header">
-                            <h1>СПИСОК ДЕЛ</h1>
-                            <span class="year-badge">2026 ГОД</span>
+                <!-- Страница ввода -->
+                <div class="planner-page active" id="pageInput">
+                    <div style="display:flex; gap:20px; flex-wrap: wrap;">
+                        <div style="flex:1; min-width:250px;">
+                            <h2 style="font-family:var(--font-heading); margin-bottom:12px;">Выберите дату</h2>
+                            <div id="inputCalendarContainer"></div>
+                            <div style="margin-top:20px;">
+                                <h3 style="font-family:var(--font-heading); margin-bottom:8px;">Инбокс (входящие задачи)</h3>
+                                <div class="filter-bar" id="inboxFilterBar">
+                                    <button class="filter-btn active" data-filter="all">Все</button>
+                                    <button class="filter-btn" data-filter="Работа">Работа</button>
+                                    <button class="filter-btn" data-filter="Дом">Дом</button>
+                                    <button class="filter-btn" data-filter="Личное">Личное</button>
+                                    <button class="filter-btn" data-filter="Звонки">Звонки</button>
+                                </div>
+                                <div id="inboxList" class="list-container"></div>
+                                <button class="add-btn" onclick="addInboxTask()"><i class="fa-solid fa-plus"></i> Добавить задачу</button>
+                            </div>
                         </div>
-                        <table class="todo-master-table">
-                            <thead>
-                                <tr>
-                                    <th class="col-tasks">ЗАДАЧИ</th>
-                                    <th class="col-priority">
-                                        ПРИОРИТЕТ
-                                        <div class="priority-subheaders">
-                                            <span title="Высокий">В</span>
-                                            <span title="Средний">С</span>
-                                            <span title="Низкий">Н</span>
-                                        </div>
-                                    </th>
-                                    <th class="col-due">СРОК И ПРОГРЕСС</th>
-                                </tr>
-                            </thead>
-                            <tbody id="masterTodoTableBody"></tbody>
-                        </table>
-                        <div style="margin-top:14px; text-align:right;">
-                            <button class="btn-action" style="background:var(--accent-purple); color:#fff; border:none; padding:10px 24px; border-radius:10px; cursor:pointer; font-size:1.0rem;" onclick="addMasterTask()">
-                                <i class="fa-solid fa-plus"></i> Добавить задачу
-                            </button>
+                        <div style="flex:2; min-width:300px;">
+                            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                                <h2 style="font-family:var(--font-heading); margin-bottom:12px;" id="selectedDateTitle">Данные дня</h2>
+                                <div class="quick-buttons">
+                                    <button onclick="changeDay(-1)">Вчера</button>
+                                    <button onclick="changeDay(0)">Сегодня</button>
+                                    <button onclick="changeDay(1)">Завтра</button>
+                                </div>
+                            </div>
+                            <!-- Блок погоды (заметный, над остальными) -->
+                            <div class="weather-card">
+                                <div class="weather-icon" id="weatherIcon">🌤</div>
+                                <div class="weather-info">
+                                    <div class="weather-temp" id="weatherTemp">—</div>
+                                    <div class="weather-desc" id="weatherDesc">Погода не определена</div>
+                                </div>
+                                <button class="weather-update-btn" onclick="getWeather(false)" title="Обновить погоду"><i class="fa-solid fa-rotate"></i></button>
+                            </div>
+                            <!-- Блоки дня -->
+                            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:16px;">
+                                <div class="planner-block" style="border:1px solid var(--border-color); border-radius:8px; padding:12px;">
+                                    <div class="block-title">ЗАДАЧИ ДНЯ</div>
+                                    <div id="dayTasksList" class="list-container"></div>
+                                    <button class="add-btn" onclick="addDayTask('tasks')"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                                <div class="planner-block" style="border:1px solid var(--border-color); border-radius:8px; padding:12px;">
+                                    <div class="block-title">ГЛАВНЫЙ ФОКУС</div>
+                                    <div id="focusList" class="list-container"></div>
+                                    <button class="add-btn" onclick="addDayTask('focus')"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                                <div class="planner-block" style="border:1px solid var(--border-color); border-radius:8px; padding:12px;">
+                                    <div class="block-title">ЗВОНКИ И ПИСЬМА</div>
+                                    <div id="callsList" class="list-container"></div>
+                                    <button class="add-btn" onclick="addDayTask('calls')"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                                <div class="planner-block" style="border:1px solid var(--border-color); border-radius:8px; padding:12px;">
+                                    <div class="block-title">ТРЕКЕР ПРИВЫЧЕК</div>
+                                    <div id="habitsList" class="list-container"></div>
+                                    <button class="add-btn" onclick="addDayTask('habits')"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                                <div class="planner-block" style="border:1px solid var(--border-color); border-radius:8px; padding:12px;">
+                                    <div class="block-title">НЕ ЗАБЫТЬ</div>
+                                    <div id="personalList" class="list-container"></div>
+                                    <button class="add-btn" onclick="addDayTask('personal')"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="planner-page" id="pageDailySpread">
-                    <div class="daily-spread-grid">
-                        <div class="page-column">
-                            <div class="daily-date-header">
-                                <div class="date-title-main">
-                                    <i class="fa-solid fa-angle-left" onclick="changeDay(-1)"></i>
-                                    <span id="dailyDateLabel">19 ВОСКРЕСЕНЬЕ</span>
-                                    <i class="fa-solid fa-angle-right" onclick="changeDay(1)"></i>
-                                </div>
-                            </div>
-                            <div class="mini-calendar-card" id="miniCalendarContainer"></div>
-                            <div class="planner-block">
-                                <div class="block-title">СПИСОК ЗАДАЧ</div>
-                                <div class="block-body" id="dailyTodoList"></div>
-                            </div>
-                            <div class="planner-block">
-                                <div class="block-title">РАСПИСАНИЕ ДНЯ</div>
-                                <div class="schedule-grid" id="scheduleGrid"></div>
-                            </div>
-                        </div>
-                        <div class="page-column">
-                            <div class="daily-date-header" style="justify-content: flex-end; gap: 16px; font-size:0.9rem; color:#6e6a7c; font-weight:700;">
-                                <span id="dailyDateRight">19 ВОСКРЕСЕНЬЕ</span>
-                                <span id="dailyDayOfYear">Н16</span>
-                                <span id="dailyMonthLabel">АПРЕЛЬ</span>
-                                <span id="dailyYearLabel">2026</span>
-                            </div>
-                            <div class="quad-notes-grid" id="quadNotesGrid"></div>
+                <!-- Страница дашборда -->
+                <div class="planner-page" id="pageDashboard">
+                    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
+                        <h2 style="font-family:var(--font-heading);">Дашборд дня</h2>
+                        <div class="quick-buttons">
+                            <button onclick="changeDay(-1)">Вчера</button>
+                            <button onclick="changeDay(0)">Сегодня</button>
+                            <button onclick="changeDay(1)">Завтра</button>
                         </div>
                     </div>
+                    <!-- Мини-календарь -->
+                    <div id="dashboardCalendarContainer" style="margin-bottom:20px;"></div>
+                    <div id="dashboardContent"></div>
                 </div>
             </div>
 
             <div class="tabs-sidebar">
-                <div class="nav-tab tab-home"><i class="fa-solid fa-house"></i></div>
-                <div class="nav-tab tab-2026 active">2026</div>
-                <div class="nav-tab tab-2027">2027</div>
-                <div class="nav-tab tab-jan" data-month="0">ЯНВ</div>
-                <div class="nav-tab tab-feb" data-month="1">ФЕВ</div>
-                <div class="nav-tab tab-mar" data-month="2">МАР</div>
-                <div class="nav-tab tab-apr active" data-month="3">АПР</div>
-                <div class="nav-tab tab-may" data-month="4">МАЙ</div>
-                <div class="nav-tab tab-jun" data-month="5">ИЮН</div>
-                <div class="nav-tab tab-jul" data-month="6">ИЮЛ</div>
-                <div class="nav-tab tab-aug" data-month="7">АВГ</div>
-                <div class="nav-tab tab-sep" data-month="8">СЕН</div>
-                <div class="nav-tab tab-oct" data-month="9">ОКТ</div>
-                <div class="nav-tab tab-nov" data-month="10">НОЯ</div>
-                <div class="nav-tab tab-dec" data-month="11">ДЕК</div>
+                <div class="nav-tab tab-jan" data-month="0" onclick="switchToMonth(0)">ЯНВ</div>
+                <div class="nav-tab tab-feb" data-month="1" onclick="switchToMonth(1)">ФЕВ</div>
+                <div class="nav-tab tab-mar" data-month="2" onclick="switchToMonth(2)">МАР</div>
+                <div class="nav-tab tab-apr active" data-month="3" onclick="switchToMonth(3)">АПР</div>
+                <div class="nav-tab tab-may" data-month="4" onclick="switchToMonth(4)">МАЙ</div>
+                <div class="nav-tab tab-jun" data-month="5" onclick="switchToMonth(5)">ИЮН</div>
+                <div class="nav-tab tab-jul" data-month="6" onclick="switchToMonth(6)">ИЮЛ</div>
+                <div class="nav-tab tab-aug" data-month="7" onclick="switchToMonth(7)">АВГ</div>
+                <div class="nav-tab tab-sep" data-month="8" onclick="switchToMonth(8)">СЕН</div>
+                <div class="nav-tab tab-oct" data-month="9" onclick="switchToMonth(9)">ОКТ</div>
+                <div class="nav-tab tab-nov" data-month="10" onclick="switchToMonth(10)">НОЯ</div>
+                <div class="nav-tab tab-dec" data-month="11" onclick="switchToMonth(11)">ДЕК</div>
             </div>
         </div>
     </div>
 
     <script>
+        // ==================== КОНСТАНТЫ ====================
         const MONTHS_RU = ['ЯНВ','ФЕВ','МАР','АПР','МАЙ','ИЮН','ИЮЛ','АВГ','СЕН','ОКТ','НОЯ','ДЕК'];
         const MONTHS_FULL_RU = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
         const DAYS_RU = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+        const CATEGORIES = ['Работа', 'Дом', 'Личное', 'Звонки'];
+        const QUOTES = [
+            { text: "Неудача — это просто возможность начать снова, но уже более мудро", author: "Генри Форд" },
+            { text: "Успех — это способность идти от поражения к поражению, не теряя энтузиазма", author: "Уинстон Черчилль" },
+            { text: "Всё, что вы можете представить — реально", author: "Пабло Пикассо" },
+            { text: "Дисциплина — это мост между целями и достижениями", author: "Джим Рон" },
+            { text: "Не считайте дни, пусть дни считаются", author: "Мохаммед Али" },
+            { text: "Будущее зависит от того, что вы делаете сегодня", author: "Махатма Ганди" },
+            { text: "Делай, что можешь, с тем, что имеешь, там, где ты есть", author: "Теодор Рузвельт" },
+            { text: "Каждое утро — это шанс изменить свою жизнь", author: "Народная мудрость" },
+            { text: "Усердие — мать удачи", author: "Бенджамин Франклин" },
+            { text: "Сложности — это то, что делает жизнь интересной, а их преодоление — значимой", author: "Джошуа Марин" },
+            { text: "Единственный способ сделать большую работу — любить то, что вы делаете", author: "Стив Джобс" },
+            { text: "Не ждите. Время никогда не будет подходящим", author: "Наполеон Хилл" },
+            { text: "Тот, кто хочет, ищет возможности; кто не хочет — ищет причины", author: "Сократ" },
+            { text: "Путь в тысячу ли начинается с первого шага", author: "Лао-цзы" },
+            { text: "Успех — это сумма маленьких усилий, повторяемых день за днём", author: "Роберт Кольер" },
+            { text: "Вы никогда не пересечёте океан, если не наберётесь смелости потерять берег из виду", author: "Христофор Колумб" },
+            { text: "Вдохновение существует, но оно должно застать вас за работой", author: "Пабло Пикассо" },
+            { text: "Лучшее время посадить дерево было 20 лет назад. Второе лучшее время — сегодня", author: "Китайская пословица" },
+            { text: "Не откладывай на завтра то, что можно сделать сегодня", author: "Бенджамин Франклин" },
+            { text: "Трудности закаляют характер, а характер порождает веру", author: "Майкл Джордан" },
+            { text: "Каждый день делай одно дело, которое приближает тебя к цели", author: "Брайан Трейси" },
+            { text: "Упади семь раз — поднимись восемь", author: "Японская пословица" },
+            { text: "Успех — это не ключ к счастью. Счастье — это ключ к успеху. Если вы любите то, что делаете, вы будете успешны", author: "Альберт Швейцер" },
+            { text: "Сила не в победе. Сила в борьбе. Когда преодолеваешь трудности — становишься сильнее", author: "Арнольд Шварценеггер" },
+            { text: "Мечтайте больше, чем другие считают практичным. Ожидайте больше, чем другие считают возможным", author: "Говард Шульц" },
+            { text: "Единственное ограничение — это то, которое вы сами себе ставите", author: "Дэвид Шварц" },
+            { text: "Делай сегодня то, что другие не хотят, завтра будешь жить так, как другие не могут", author: "Джаред Лето" },
+            { text: "Успех — это умение двигаться от неудачи к неудаче без потери энтузиазма", author: "Уинстон Черчилль" },
+            { text: "Ваше время ограничено, не тратьте его, живя чужой жизнью", author: "Стив Джобс" },
+            { text: "То, что мы делаем сегодня, определяет то, кем мы станем завтра", author: "Аристотель" }
+        ];
 
+        // ==================== СОСТОЯНИЕ ====================
         let currentDate = new Date();
         let dailyDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+        let viewYear = dailyDate.getFullYear();
+        let viewMonth = dailyDate.getMonth();
+        let masterTasks = []; // { text, category, important }
+        let dataByDate = {}; // { "YYYY-MM-DD": { tasks: [], focus: [], calls: [], habits: [], personal: [], weather: "" } }
+        let currentFilter = 'all';
+        let saveTimeout = null;
+        let currentTheme = 'light';
 
-        let masterTasks = [];
-        let dailyTodos = [];
-        let scheduleItems = [];
-        let quadNotes = [];
+        // ==================== ТЕМА ====================
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            localStorage.setItem('planner_theme', currentTheme);
+            document.getElementById('themeIcon').className = currentTheme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+        }
+        function loadTheme() {
+            const saved = localStorage.getItem('planner_theme');
+            if (saved) {
+                currentTheme = saved;
+                document.documentElement.setAttribute('data-theme', saved);
+                document.getElementById('themeIcon').className = saved === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+            }
+        }
 
-        let canvas, ctx;
-        let isDrawingMode = false;
-        let isMouseDown = false;
-        let currentTool = 'pen';
-        let currentColor = '#2b2b36';
-        let drawHistory = [];
-        let canvasDataURL = '';
-
+        // ==================== ЗАГРУЗКА / СОХРАНЕНИЕ ====================
         function loadState() {
             try {
-                const saved = localStorage.getItem('planner2026_state');
+                const saved = localStorage.getItem('planner2026_state_v2');
                 if (saved) {
                     const state = JSON.parse(saved);
                     masterTasks = state.masterTasks || [];
-                    dailyTodos = state.dailyTodos || [];
-                    scheduleItems = state.scheduleItems || [];
-                    quadNotes = state.quadNotes || [];
+                    dataByDate = state.dataByDate || {};
                     if (state.dailyDate) dailyDate = new Date(state.dailyDate);
-                    canvasDataURL = state.canvasDataURL || '';
+                    currentFilter = state.currentFilter || 'all';
+                    viewYear = dailyDate.getFullYear();
+                    viewMonth = dailyDate.getMonth();
                 } else {
                     initDefaultData();
                 }
-            } catch(e) {
-                console.warn('Ошибка загрузки состояния', e);
-                initDefaultData();
-            }
+            } catch(e) { console.warn('Ошибка загрузки', e); initDefaultData(); }
         }
-
-        function saveState() {
+        function saveStateSync() {
             try {
-                if (canvas) {
-                    canvasDataURL = canvas.toDataURL('image/png');
-                }
                 const state = {
                     masterTasks,
-                    dailyTodos,
-                    scheduleItems,
-                    quadNotes,
+                    dataByDate,
                     dailyDate: dailyDate.toISOString(),
-                    canvasDataURL
+                    currentFilter
                 };
-                localStorage.setItem('planner2026_state', JSON.stringify(state));
+                localStorage.setItem('planner2026_state_v2', JSON.stringify(state));
             } catch(e) { console.warn('Ошибка сохранения', e); }
         }
-
+        function saveState() {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(saveStateSync, 2000);
+        }
         function initDefaultData() {
             masterTasks = [
-                { text: "Завершить и отправить ежемесячный отчет команде.", priority: "H", due: "4-е", progress: 100, checked: true },
-                { text: "Записать Катю на летние уроки танцев.", priority: "H", due: "3-е", progress: 100, checked: true },
-                { text: "Заполнить и подать налоговую декларацию.", priority: "M", due: "15-е", progress: 60, checked: false },
-                { text: "Купить продукты на неделю.", priority: "L", due: "2-е", progress: 100, checked: true },
-                { text: "Навести порядок на кухне и в кладовой.", priority: "M", due: "6-е", progress: 100, checked: true },
-                { text: "Посетить школьный концерт Кати.", priority: "H", due: "3-е", progress: 100, checked: true },
-                { text: "Забронировать столик на семейный ужин в пятницу.", priority: "L", due: "5-е", progress: 100, checked: false },
-                { text: "Составить и отправить коммерческое предложение клиенту.", priority: "H", due: "8-е", progress: 100, checked: true },
-                { text: "Оплатить коммунальные платежи.", priority: "M", due: "10-е", progress: 100, checked: false },
-                { text: "Записать Катю на прием к стоматологу.", priority: "L", due: "9-е", progress: 50, checked: false },
-                { text: "Связаться с клиентом по поводу обратной связи.", priority: "M", due: "7-е", progress: 100, checked: false },
-                { text: "Купить подарок маме на день рождения.", priority: "H", due: "12-е", progress: 100, checked: true },
-                { text: "Спланировать семейную поездку на выходные.", priority: "L", due: "18-е", progress: 25, checked: false },
-                { text: "", priority: "", due: "", progress: 0, checked: false }
+                { text: "Купить продукты на неделю", category: "Дом", important: false },
+                { text: "Позвонить маме", category: "Звонки", important: true },
+                { text: "Доделать отчёт", category: "Работа", important: false },
+                { text: "Записаться к врачу", category: "Личное", important: false },
             ];
-            dailyTodos = [
-                { text: "Завершить квартальный финансовый отчет.", checked: true },
-                { text: "Подготовить презентацию для руководства.", checked: true },
-                { text: "Разослать приглашения на тимбилдинг.", checked: false },
-                { text: "Подтвердить обед с потенциальным клиентом.", checked: false },
-                { text: "Проверить показатели маркетинговой кампании.", checked: true },
-                { text: "Купить подарок жене на день рождения.", checked: false },
-                { text: "Записаться на родительское собрание.", checked: false },
-                { text: "Обсудить с семьей планы на отпуск.", checked: false }
-            ];
-            scheduleItems = [
-                { time: "07:00", text: "Подъем, зарядка и утренние дела." },
-                { time: "08:00", text: "Завтрак с семьей." },
-                { time: "09:00", text: "Проверка почты и новостей." },
-                { time: "10:00", text: "Рабочая встреча с командой." },
-                { time: "11:00", text: "Работа над ключевыми проектами." },
-                { time: "12:00", text: "Обеденный перерыв." },
-                { time: "13:00", text: "Звонок / встреча с клиентом." },
-                { time: "14:00", text: "Продолжение проектных задач." },
-                { time: "15:00", text: "Синхронизация статусов с коллегами." },
-                { time: "16:00", text: "Согласование и подписание документов." },
-                { time: "17:00", text: "Итоги дня и план на завтра." },
-                { time: "18:00", text: "Дорога домой, время с детьми." },
-                { time: "19:00", text: "Семейный ужин." },
-                { time: "20:00", text: "Хобби, спорт или чтение." },
-                { time: "21:00", text: "Отдых и время с супругой." }
-            ];
-            quadNotes = [
-                ["Фокус 1: Завершить ТЗ", "Фокус 2: Проверка отчетов", "Фокус 3: Встреча", "", "", "", "", ""],
-                ["Клиент по проекту ESP", "Позвонить поставщику", "Ответить на почту", "", "", "", "", ""],
-                ["Тренировка 45 минут", "Чтение профильной книги", "Прогулка 10 000 шагов", "", "", "", "", ""],
-                ["Вода: 2.0 литра", "Прием витаминов", "План на неделю", "", "", "", "", ""]
-            ];
+            const todayKey = formatDateKey(dailyDate);
+            dataByDate[todayKey] = {
+                tasks: [{ text: "Завершить квартальный отчёт", checked: false }],
+                focus: [{ text: "Сфокусироваться на проекте", checked: false }],
+                calls: [{ text: "Созвон с клиентом", checked: false }],
+                habits: [{ text: "Зарядка 30 минут", checked: false }],
+                personal: [{ text: "Выгулять собаку", checked: false }],
+                weather: ""
+            };
+            saveStateSync();
         }
 
-        function renderMasterTable() {
-            const tbody = document.getElementById("masterTodoTableBody");
-            tbody.innerHTML = "";
-            masterTasks.forEach((task, index) => {
-                const tr = document.createElement("tr");
-                tr.className = "todo-row";
-                tr.innerHTML = `
-                    <td>
-                        <div class="td-task">
-                            <span class="task-num">${index+1}.</span>
-                            <div class="custom-checkbox ${task.checked?'checked':''}" onclick="toggleMasterCheck(${index})"></div>
-                            <input type="text" class="editable-input" value="${task.text}" placeholder="Новая задача..." onchange="updateMasterText(${index}, this.value)">
-                            <div class="task-actions">
-                                <button onclick="deleteMasterTask(${index})" title="Удалить"><i class="fa-solid fa-xmark"></i></button>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="priority-group">
-                            <div class="p-box ${task.priority==='H'?'selected-h':''}" onclick="setMasterPriority(${index}, 'H')"></div>
-                            <div class="p-box ${task.priority==='M'?'selected-m':''}" onclick="setMasterPriority(${index}, 'M')"></div>
-                            <div class="p-box ${task.priority==='L'?'selected-l':''}" onclick="setMasterPriority(${index}, 'L')"></div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="due-progress-cell">
-                            <input type="text" class="due-date-input" value="${task.due}" placeholder="Срок" onchange="updateMasterDue(${index}, this.value)">
-                            <div class="progress-pill" onclick="cycleMasterProgress(${index}, this)">
-                                <div class="progress-fill" style="width:${task.progress}%;"></div>
-                            </div>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-            saveState();
+        // ==================== УТИЛИТЫ ====================
+        function formatDateKey(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
         }
-
-        function toggleMasterCheck(idx) {
-            masterTasks[idx].checked = !masterTasks[idx].checked;
-            renderMasterTable();
-        }
-        function updateMasterText(idx, val) {
-            masterTasks[idx].text = val;
-            saveState();
-        }
-        function updateMasterDue(idx, val) {
-            masterTasks[idx].due = val;
-            saveState();
-        }
-        function setMasterPriority(idx, level) {
-            if (masterTasks[idx].priority === level) masterTasks[idx].priority = '';
-            else masterTasks[idx].priority = level;
-            renderMasterTable();
-        }
-        function cycleMasterProgress(idx, pillEl) {
-            let p = masterTasks[idx].progress;
-            p = (p + 25) % 125;
-            if (p > 100) p = 0;
-            masterTasks[idx].progress = p;
-            pillEl.querySelector('.progress-fill').style.width = p + '%';
-            saveState();
-        }
-        function deleteMasterTask(idx) {
-            masterTasks.splice(idx, 1);
-            renderMasterTable();
-        }
-        function addMasterTask() {
-            masterTasks.push({ text: "Новая задача", priority: "", due: "", progress: 0, checked: false });
-            renderMasterTable();
-            setTimeout(() => {
-                const inputs = document.querySelectorAll('#masterTodoTableBody .editable-input');
-                if (inputs.length) inputs[inputs.length-1].focus();
-            }, 50);
-        }
-
-        function renderDailySpread() {
-            const day = dailyDate.getDate();
-            const month = dailyDate.getMonth();
-            const year = dailyDate.getFullYear();
-            const weekDay = dailyDate.getDay();
-            const dayName = DAYS_RU[weekDay];
-            const monthName = MONTHS_FULL_RU[month];
-            const dateStr = `${day} ${dayName.toUpperCase()}`;
-            document.getElementById('dailyDateLabel').textContent = dateStr;
-            document.getElementById('dailyDateRight').textContent = dateStr;
-            document.getElementById('dailyMonthLabel').textContent = monthName.toUpperCase();
-            document.getElementById('dailyYearLabel').textContent = year;
-            const start = new Date(year, 0, 0);
-            const diff = (dailyDate - start) / (1000*60*60*24);
-            document.getElementById('dailyDayOfYear').textContent = 'Н' + Math.floor(diff);
-
-            renderMiniCalendar(year, month, day);
-
-            const todoContainer = document.getElementById('dailyTodoList');
-            todoContainer.innerHTML = '';
-            dailyTodos.forEach((item, idx) => {
-                const div = document.createElement('div');
-                div.className = 'daily-todo-item';
-                div.innerHTML = `
-                    <div class="custom-checkbox ${item.checked?'checked':''}" onclick="toggleDailyTodo(${idx})"></div>
-                    <input type="text" class="editable-input" value="${item.text}" onchange="updateDailyTodo(${idx}, this.value)">
-                `;
-                todoContainer.appendChild(div);
-            });
-
-            const schedContainer = document.getElementById('scheduleGrid');
-            schedContainer.innerHTML = '';
-            scheduleItems.forEach((slot, idx) => {
-                const div = document.createElement('div');
-                div.className = 'schedule-row';
-                div.innerHTML = `
-                    <div class="time-label">${slot.time}</div>
-                    <input type="text" class="schedule-input" value="${slot.text}" onchange="updateSchedule(${idx}, this.value)">
-                `;
-                schedContainer.appendChild(div);
-            });
-
-            const grid = document.getElementById('quadNotesGrid');
-            grid.innerHTML = '';
-            const titles = ['Главный фокус', 'Звонки и письма', 'Личные цели', 'Трекер привычек'];
-            for (let c = 0; c < 4; c++) {
-                const card = document.createElement('div');
-                card.className = 'note-card-box';
-                card.innerHTML = `<div class="note-card-title" contenteditable="true" onblur="updateQuadTitle(${c}, this.innerText)">${titles[c]}</div>`;
-                for (let l = 0; l < 8; l++) {
-                    const line = document.createElement('div');
-                    line.className = 'line-item';
-                    const val = (quadNotes[c] && quadNotes[c][l]) ? quadNotes[c][l] : '';
-                    line.innerHTML = `
-                        <div class="custom-checkbox ${val?'checked':''}" onclick="this.classList.toggle('checked')"></div>
-                        <input type="text" value="${val}" onchange="updateQuadNote(${c}, ${l}, this.value)">
-                    `;
-                    card.appendChild(line);
-                }
-                grid.appendChild(card);
+        function getDateData(date) {
+            const key = formatDateKey(date);
+            if (!dataByDate[key]) {
+                dataByDate[key] = { tasks: [], focus: [], calls: [], habits: [], personal: [], weather: "" };
             }
+            return dataByDate[key];
+        }
+        function renderAll() {
+            renderCalendar('inputCalendarContainer');
+            renderCalendar('dashboardCalendarContainer', true);
+            renderInbox();
+            renderDayBlocks();
+            renderDashboard();
             saveState();
         }
 
-        function renderMiniCalendar(year, month, activeDay) {
-            const container = document.getElementById('miniCalendarContainer');
+        // ==================== КАЛЕНДАРЬ ====================
+        function renderCalendar(containerId, isMini = false) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const year = viewYear;
+            const month = viewMonth;
             const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month+1, 0).getDate();
-            let html = `<table class="calendar-table"><thead><tr><th>Вс</th><th>Пн</th><th>Вт</th><th>Ср</th><th>Чт</th><th>Пт</th><th>Сб</th></tr></thead><tbody><tr>`;
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const activeDay = dailyDate.getDate() + (dailyDate.getMonth() === month && dailyDate.getFullYear() === year ? 0 : 0);
+            // активный день только если выбранный день в этом месяце
+            const isActiveMonth = dailyDate.getMonth() === month && dailyDate.getFullYear() === year;
+            let html = `<div class="calendar-header">
+                            <button onclick="shiftMonth(-1)"><i class="fa-solid fa-angle-left"></i></button>
+                            <span class="month-year">${MONTHS_FULL_RU[month]} ${year}</span>
+                            <button onclick="shiftMonth(1)"><i class="fa-solid fa-angle-right"></i></button>
+                        </div>`;
+            html += `<div style="text-align:center; margin-bottom:8px;"><button class="btn-action" style="background:var(--accent-purple); color:#fff; padding:4px 12px;" onclick="goToday()">Сегодня</button></div>`;
+            html += `<table style="width:100%; border-collapse:collapse; text-align:center; font-size:${isMini ? '0.8rem' : '0.9rem'};">
+                        <thead><tr>`;
+            ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'].forEach(d => html += `<th>${d}</th>`);
+            html += `</tr></thead><tbody><tr>`;
             for (let i = 0; i < firstDay; i++) html += '<td></td>';
             for (let d = 1; d <= daysInMonth; d++) {
                 if ((d + firstDay - 1) % 7 === 0 && d > 1) html += '</tr><tr>';
-                const cls = (d === activeDay) ? 'active-day' : '';
-                html += `<td class="${cls}">${d}</td>`;
+                const dateKey = formatDateKey(new Date(year, month, d));
+                const hasData = dataByDate[dateKey] && (dataByDate[dateKey].tasks.length || dataByDate[dateKey].focus.length || dataByDate[dateKey].calls.length || dataByDate[dateKey].habits.length || dataByDate[dateKey].personal.length);
+                const cls = (d === activeDay && isActiveMonth) ? 'active-day' : '';
+                const indicator = hasData ? ' calendar-day-indicator' : '';
+                html += `<td class="${cls}${indicator}" style="cursor:pointer; border-radius:50%; padding:4px;" onclick="selectDay(${d}, ${month}, ${year})">${d}</td>`;
             }
             html += '</tr></tbody></table>';
             container.innerHTML = html;
+            // Обновляем заголовок выбранной даты (только для страницы ввода)
+            if (containerId === 'inputCalendarContainer') {
+                document.getElementById('selectedDateTitle').textContent = `${dailyDate.getDate()} ${MONTHS_FULL_RU[dailyDate.getMonth()]} ${dailyDate.getFullYear()}`;
+            }
+            // Подсветка активного месяца в сайдбаре
+            document.querySelectorAll('.tabs-sidebar .nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (parseInt(tab.dataset.month) === month && year === dailyDate.getFullYear()) tab.classList.add('active');
+            });
         }
 
-        function toggleDailyTodo(idx) {
-            dailyTodos[idx].checked = !dailyTodos[idx].checked;
-            renderDailySpread();
+        function shiftMonth(delta) {
+            viewMonth += delta;
+            if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+            else if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+            renderAll();
         }
-        function updateDailyTodo(idx, val) {
-            dailyTodos[idx].text = val;
-            saveState();
+        function goToday() {
+            dailyDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+            viewYear = dailyDate.getFullYear();
+            viewMonth = dailyDate.getMonth();
+            renderAll();
         }
-        function updateSchedule(idx, val) {
-            scheduleItems[idx].text = val;
-            saveState();
+        function selectDay(day, month, year) {
+            dailyDate = new Date(year, month, day);
+            viewYear = year;
+            viewMonth = month;
+            renderAll();
         }
-        function updateQuadTitle(cardIdx, val) {
-            // просто сохраняем факт изменения
+        function switchToMonth(monthIdx) {
+            // Устанавливаем месяц, год остаётся текущим (viewYear)
+            viewMonth = monthIdx;
+            dailyDate = new Date(viewYear, monthIdx, 1);
+            renderAll();
         }
-        function updateQuadNote(cardIdx, lineIdx, val) {
-            if (!quadNotes[cardIdx]) quadNotes[cardIdx] = [];
-            quadNotes[cardIdx][lineIdx] = val;
-            saveState();
-        }
-
         function changeDay(delta) {
-            dailyDate.setDate(dailyDate.getDate() + delta);
-            renderDailySpread();
-            saveState();
+            if (delta === 0) {
+                dailyDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+            } else {
+                dailyDate.setDate(dailyDate.getDate() + delta);
+            }
+            viewYear = dailyDate.getFullYear();
+            viewMonth = dailyDate.getMonth();
+            renderAll();
         }
 
+        // ==================== ИНБОКС (МАСТЕР-СПИСОК) ====================
+        function renderInbox() {
+            const list = document.getElementById('inboxList');
+            list.innerHTML = '';
+            const filtered = masterTasks.filter(t => currentFilter === 'all' || t.category === currentFilter);
+            filtered.forEach((task, idx) => {
+                const realIdx = masterTasks.indexOf(task);
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.setAttribute('data-id', realIdx);
+                div.innerHTML = `
+                    <span class="star ${task.important ? 'active' : ''}" onclick="toggleImportant(${realIdx})"><i class="fa-solid fa-star"></i></span>
+                    <span class="category-tag">${task.category || '—'}</span>
+                    <input type="text" value="${task.text}" onchange="updateInboxText(${realIdx}, this.value)">
+                    <button class="delete-btn" onclick="deleteInboxTask(${realIdx})"><i class="fa-solid fa-xmark"></i></button>
+                `;
+                list.appendChild(div);
+            });
+            new Sortable(list, {
+                group: 'shared',
+                animation: 150,
+                onEnd: function(evt) {
+                    updateMasterFromDOM();
+                    renderAll();
+                }
+            });
+        }
+
+        function addInboxTask() {
+            masterTasks.push({ text: "Новая задача", category: "", important: false });
+            renderInbox();
+            const inputs = document.querySelectorAll('#inboxList input[type="text"]');
+            if (inputs.length) inputs[inputs.length-1].focus();
+            saveState();
+        }
+        function toggleImportant(idx) {
+            masterTasks[idx].important = !masterTasks[idx].important;
+            renderInbox();
+        }
+        function updateInboxText(idx, val) {
+            masterTasks[idx].text = val;
+            saveState();
+        }
+        function deleteInboxTask(idx) {
+            masterTasks.splice(idx, 1);
+            renderInbox();
+            saveState();
+        }
+        function updateMasterFromDOM() {
+            const items = document.querySelectorAll('#inboxList .list-item');
+            const newMaster = [];
+            items.forEach(item => {
+                const text = item.querySelector('input').value;
+                const category = item.querySelector('.category-tag')?.textContent || '';
+                const important = item.querySelector('.star').classList.contains('active');
+                newMaster.push({ text, category, important });
+            });
+            masterTasks = newMaster;
+        }
+
+        // ==================== ДНЕВНЫЕ БЛОКИ ====================
+        function renderDayBlocks() {
+            const dayData = getDateData(dailyDate);
+            renderList('dayTasksList', dayData.tasks, 'tasks');
+            renderList('focusList', dayData.focus, 'focus');
+            renderList('callsList', dayData.calls, 'calls');
+            renderList('habitsList', dayData.habits, 'habits');
+            renderList('personalList', dayData.personal, 'personal');
+            updateWeatherDisplay(dayData.weather);
+        }
+
+        function renderList(containerId, items, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            items.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.dataset.index = idx;
+                div.innerHTML = `
+                    <div class="custom-checkbox ${item.checked ? 'checked' : ''}" onclick="toggleItem('${type}', ${idx})"></div>
+                    <input type="text" value="${item.text}" onchange="updateItemText('${type}', ${idx}, this.value)">
+                    <button class="delete-btn" onclick="deleteItem('${type}', ${idx})"><i class="fa-solid fa-xmark"></i></button>
+                `;
+                container.appendChild(div);
+            });
+            new Sortable(container, {
+                group: 'shared',
+                animation: 150,
+                onEnd: function(evt) {
+                    updateDayDataFromDOM();
+                    renderAll();
+                }
+            });
+        }
+
+        function addDayTask(type) {
+            const dayData = getDateData(dailyDate);
+            dayData[type].push({ text: "Новая задача", checked: false });
+            renderDayBlocks();
+            saveState();
+        }
+        function toggleItem(type, idx) {
+            const dayData = getDateData(dailyDate);
+            dayData[type][idx].checked = !dayData[type][idx].checked;
+            const containerId = type === 'tasks' ? 'dayTasksList' : type === 'focus' ? 'focusList' : type === 'calls' ? 'callsList' : type === 'habits' ? 'habitsList' : 'personalList';
+            const container = document.getElementById(containerId);
+            const checkboxes = container.querySelectorAll('.custom-checkbox');
+            checkboxes[idx].classList.toggle('checked');
+            saveState();
+        }
+        function updateItemText(type, idx, val) {
+            const dayData = getDateData(dailyDate);
+            dayData[type][idx].text = val;
+            saveState();
+        }
+        function deleteItem(type, idx) {
+            const dayData = getDateData(dailyDate);
+            dayData[type].splice(idx, 1);
+            renderDayBlocks();
+            saveState();
+        }
+        function updateDayDataFromDOM() {
+            const dayData = getDateData(dailyDate);
+            const types = ['tasks', 'focus', 'calls', 'habits', 'personal'];
+            types.forEach(type => {
+                const containerId = type === 'tasks' ? 'dayTasksList' : type === 'focus' ? 'focusList' : type === 'calls' ? 'callsList' : type === 'habits' ? 'habitsList' : 'personalList';
+                const container = document.getElementById(containerId);
+                const items = container.querySelectorAll('.list-item');
+                const newArr = [];
+                items.forEach(item => {
+                    const text = item.querySelector('input').value;
+                    const checked = item.querySelector('.custom-checkbox').classList.contains('checked');
+                    newArr.push({ text, checked });
+                });
+                dayData[type] = newArr;
+            });
+        }
+
+        // ==================== ПОГОДА ====================
+        function updateWeatherDisplay(weatherStr) {
+            const icon = document.getElementById('weatherIcon');
+            const temp = document.getElementById('weatherTemp');
+            const desc = document.getElementById('weatherDesc');
+            if (weatherStr) {
+                const parts = weatherStr.split(',');
+                temp.textContent = parts[0] || '—';
+                desc.textContent = parts[1] ? parts[1].trim() : '—';
+                const lower = weatherStr.toLowerCase();
+                if (lower.includes('ясно') || lower.includes('солн')) icon.textContent = '☀️';
+                else if (lower.includes('облач') || lower.includes('перемен')) icon.textContent = '⛅';
+                else if (lower.includes('дожд')) icon.textContent = '🌧️';
+                else if (lower.includes('снег')) icon.textContent = '❄️';
+                else if (lower.includes('туман')) icon.textContent = '🌫️';
+                else if (lower.includes('гроз')) icon.textContent = '⛈️';
+                else icon.textContent = '🌤';
+            } else {
+                temp.textContent = '—';
+                desc.textContent = 'Погода не определена';
+                icon.textContent = '🌤';
+            }
+        }
+
+        async function getWeather(silent = false) {
+            const btn = document.querySelector('.weather-update-btn i');
+            if (btn) btn.className = 'fa-solid fa-spinner fa-spin';
+            if (!navigator.geolocation) {
+                if (!silent) alert('Геолокация не поддерживается');
+                if (btn) btn.className = 'fa-solid fa-rotate';
+                return;
+            }
+            try {
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
+                });
+                const { latitude, longitude } = position.coords;
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&timezone=auto`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Ошибка запроса');
+                const data = await response.json();
+                const temp = Math.round(data.current_weather.temperature);
+                const code = data.current_weather.weathercode;
+                const descriptions = {
+                    0: 'Ясно', 1: 'В основном ясно', 2: 'Переменная облачность', 3: 'Пасмурно',
+                    45: 'Туман', 48: 'Иней', 51: 'Морось', 53: 'Морось', 55: 'Морось',
+                    61: 'Небольшой дождь', 63: 'Дождь', 65: 'Сильный дождь',
+                    71: 'Снег', 73: 'Снег', 75: 'Сильный снег',
+                    95: 'Гроза'
+                };
+                const desc = descriptions[code] || '—';
+                const weatherStr = `${temp}°C, ${desc}`;
+                const dayData = getDateData(dailyDate);
+                dayData.weather = weatherStr;
+                updateWeatherDisplay(weatherStr);
+                saveState();
+                renderDashboard();
+                if (!silent) {
+                    // показать уведомление? можно просто алерт
+                }
+            } catch(err) {
+                console.warn(err);
+                if (!silent) alert('Не удалось получить погоду. Введите вручную.');
+            } finally {
+                if (btn) btn.className = 'fa-solid fa-rotate';
+            }
+        }
+
+        // ==================== ЦИТАТА ====================
+        function renderRandomQuote() {
+            const quote = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+            document.getElementById('dashboardQuoteText').textContent = `«${quote.text}»`;
+            document.getElementById('dashboardQuoteAuthor').textContent = `— ${quote.author}`;
+        }
+
+        // ==================== ДАШБОРД ====================
+        function renderDashboard() {
+            const container = document.getElementById('dashboardContent');
+            const dayData = getDateData(dailyDate);
+            container.innerHTML = '';
+            // Верхний блок: погода + цитата
+            const topBlock = document.createElement('div');
+            topBlock.className = 'weather-quote-grid';
+            topBlock.innerHTML = `
+                <div class="dashboard-block" style="background: linear-gradient(135deg, #f0f8ff, #e6f2ff);">
+                    <h3>Погода</h3>
+                    <div style="display:flex; align-items:center; gap:15px;">
+                        <span style="font-size:3rem;">${getWeatherIcon(dayData.weather)}</span>
+                        <div style="flex:1;">
+                            <div style="font-family:var(--font-heading); font-size:1.8rem; font-weight:700;">${dayData.weather ? dayData.weather.split(',')[0] : '—'}</div>
+                            <div style="font-family:var(--font-handwriting); font-size:1.2rem; color:var(--text-muted);">${dayData.weather ? dayData.weather.split(',')[1]?.trim() || '' : 'Не определена'}</div>
+                        </div>
+                        <button class="weather-update-btn" onclick="getWeather(false)" title="Обновить погоду"><i class="fa-solid fa-rotate"></i></button>
+                    </div>
+                </div>
+                <div class="dashboard-block quote-block">
+                    <div class="quote-text" id="dashboardQuoteText"></div>
+                    <div class="quote-author" id="dashboardQuoteAuthor"></div>
+                </div>
+            `;
+            container.appendChild(topBlock);
+            // Остальные блоки
+            const grid = document.createElement('div');
+            grid.className = 'dashboard-grid';
+            grid.innerHTML = `
+                <div class="dashboard-block">
+                    <h3>Задачи дня</h3>
+                    ${renderDashboardList(dayData.tasks)}
+                </div>
+                <div class="dashboard-block">
+                    <h3>Главный фокус</h3>
+                    ${renderDashboardList(dayData.focus)}
+                </div>
+                <div class="dashboard-block">
+                    <h3>Звонки и письма</h3>
+                    ${renderDashboardList(dayData.calls)}
+                </div>
+                <div class="dashboard-block">
+                    <h3>Трекер привычек</h3>
+                    ${renderDashboardList(dayData.habits)}
+                </div>
+                <div class="dashboard-block">
+                    <h3>Не забыть</h3>
+                    ${renderDashboardList(dayData.personal)}
+                </div>
+            `;
+            container.appendChild(grid);
+            // Заполняем цитату
+            renderRandomQuote();
+        }
+
+        function getWeatherIcon(weatherStr) {
+            if (!weatherStr) return '🌤';
+            const lower = weatherStr.toLowerCase();
+            if (lower.includes('ясно') || lower.includes('солн')) return '☀️';
+            if (lower.includes('облач') || lower.includes('перемен')) return '⛅';
+            if (lower.includes('дожд')) return '🌧️';
+            if (lower.includes('снег')) return '❄️';
+            if (lower.includes('туман')) return '🌫️';
+            if (lower.includes('гроз')) return '⛈️';
+            return '🌤';
+        }
+
+        function renderDashboardList(items) {
+            if (!items || items.length === 0) return '<div style="color:var(--text-muted);">Пусто</div>';
+            return items.map(item => `
+                <div class="dashboard-item">
+                    <div class="custom-checkbox ${item.checked ? 'checked' : ''}" onclick="event.stopPropagation(); this.classList.toggle('checked');"></div>
+                    <span style="font-family:var(--font-handwriting); font-size:1.2rem;">${item.text}</span>
+                </div>
+            `).join('');
+        }
+
+        // ==================== ПЕРЕКЛЮЧЕНИЕ ВИДОВ ====================
         function switchView(view) {
             document.querySelectorAll('.planner-page').forEach(p => p.classList.remove('active'));
-            if (view === 'master-todo') {
-                document.getElementById('pageMasterTodo').classList.add('active');
-            } else {
-                document.getElementById('pageDailySpread').classList.add('active');
-            }
+            document.getElementById(view === 'input' ? 'pageInput' : 'pageDashboard').classList.add('active');
             document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
             document.querySelector(`.view-btn[data-view="${view}"]`).classList.add('active');
-            setTimeout(resizeCanvas, 100);
+            if (view === 'dashboard') {
+                // Автоматическое определение погоды для сегодняшнего дня
+                const todayKey = formatDateKey(new Date());
+                const selectedKey = formatDateKey(dailyDate);
+                if (todayKey === selectedKey) {
+                    const dayData = getDateData(dailyDate);
+                    if (!dayData.weather) {
+                        getWeather(true); // тихий вызов
+                    }
+                }
+                renderDashboard(); // рендерим с новой цитатой
+            }
         }
-
         document.querySelectorAll('.view-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                switchView(this.dataset.view);
-            });
+            btn.addEventListener('click', () => switchView(btn.dataset.view));
         });
 
-        // РИСОВАНИЕ
-        function initCanvas() {
-            canvas = document.getElementById('drawingCanvas');
-            ctx = canvas.getContext('2d');
-            resizeCanvas();
-            if (canvasDataURL) {
-                const img = new Image();
-                img.onload = () => { ctx.drawImage(img, 0, 0); };
-                img.src = canvasDataURL;
+        // Свайп для переключения
+        let touchStartX = 0;
+        document.getElementById('paperViewport').addEventListener('touchstart', e => {
+            touchStartX = e.touches[0].clientX;
+        }, { passive: true });
+        document.getElementById('paperViewport').addEventListener('touchend', e => {
+            const deltaX = e.changedTouches[0].clientX - touchStartX;
+            if (Math.abs(deltaX) > 80) {
+                if (deltaX < 0) switchView('dashboard');
+                else switchView('input');
             }
+        });
 
-            canvas.addEventListener('mousedown', startDraw);
-            canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('mouseup', stopDraw);
-            canvas.addEventListener('mouseleave', stopDraw);
-            canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDraw(e.touches[0]); }, { passive: false });
-            canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e.touches[0]); }, { passive: false });
-            canvas.addEventListener('touchend', stopDraw);
-        }
-
-        function resizeCanvas() {
-            if (!canvas) return;
-            const viewport = document.getElementById('paperViewport');
-            canvas.width = viewport.scrollWidth;
-            canvas.height = viewport.scrollHeight;
-            if (canvasDataURL) {
-                const img = new Image();
-                img.onload = () => { ctx.drawImage(img, 0, 0); };
-                img.src = canvasDataURL;
-            }
-        }
-
-        function toggleDrawingMode() {
-            isDrawingMode = !isDrawingMode;
-            const btn = document.getElementById('drawModeBtn');
-            if (isDrawingMode) {
-                btn.style.background = '#5c527f';
-                canvas.classList.add('drawing-active');
-            } else {
-                btn.style.background = 'rgba(255, 255, 255, 0.14)';
-                canvas.classList.remove('drawing-active');
-            }
-        }
-
-        function selectTool(tool) {
-            currentTool = tool;
-            document.querySelectorAll('.tool-icon').forEach(i => i.classList.remove('active'));
-            if (tool === 'pen') document.getElementById('toolPen').classList.add('active');
-            else if (tool === 'highlighter') document.getElementById('toolHighlighter').classList.add('active');
-            else if (tool === 'eraser') document.getElementById('toolEraser').classList.add('active');
-        }
-
-        function selectColor(color, el) {
-            currentColor = color;
-            document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
-            el.classList.add('active');
-        }
-
-        function startDraw(e) {
-            if (!isDrawingMode) return;
-            isMouseDown = true;
-            const rect = canvas.getBoundingClientRect();
-            ctx.beginPath();
-            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-        }
-
-        function draw(e) {
-            if (!isMouseDown || !isDrawingMode) return;
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            if (currentTool === 'eraser') {
-                ctx.globalCompositeOperation = 'destination-out';
-                ctx.lineWidth = 26;
-            } else {
-                ctx.globalCompositeOperation = 'source-over';
-                ctx.strokeStyle = currentColor;
-                ctx.lineWidth = (currentTool === 'highlighter') ? 14 : 2.5;
-            }
-            ctx.lineTo(x, y);
-            ctx.stroke();
-        }
-
-        function stopDraw() {
-            if (isMouseDown) {
-                ctx.closePath();
-                isMouseDown = false;
-                drawHistory.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
-                saveState();
-            }
-        }
-
-        function clearCanvas() {
-            if (!confirm('Очистить все рисунки?')) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawHistory = [];
-            canvasDataURL = '';
-            saveState();
-        }
-
-        function undoCanvas() {
-            if (drawHistory.length > 0) {
-                drawHistory.pop();
-                if (drawHistory.length > 0) {
-                    ctx.putImageData(drawHistory[drawHistory.length-1], 0, 0);
-                } else {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                }
-                saveState();
-            }
-        }
-
+        // ==================== ЭКСПОРТ / ИМПОРТ ====================
         function exportData() {
-            saveState();
-            const state = localStorage.getItem('planner2026_state');
+            saveStateSync();
+            const state = localStorage.getItem('planner2026_state_v2');
             const blob = new Blob([state], {type: 'application/json'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -815,7 +994,6 @@
             a.click();
             URL.revokeObjectURL(url);
         }
-
         function importData(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -823,32 +1001,29 @@
             reader.onload = (e) => {
                 try {
                     const data = JSON.parse(e.target.result);
-                    localStorage.setItem('planner2026_state', JSON.stringify(data));
+                    localStorage.setItem('planner2026_state_v2', JSON.stringify(data));
                     location.reload();
-                } catch(err) {
-                    alert('Ошибка импорта: неверный формат');
-                }
+                } catch(err) { alert('Ошибка импорта'); }
             };
             reader.readAsText(file);
         }
 
-        window.addEventListener('load', () => {
-            loadState();
-            renderMasterTable();
-            renderDailySpread();
-            initCanvas();
-            const monthIdx = dailyDate.getMonth();
-            document.querySelectorAll('.tabs-sidebar .nav-tab').forEach(tab => {
-                tab.classList.remove('active');
-                const m = tab.dataset.month;
-                if (m !== undefined && parseInt(m) === monthIdx) tab.classList.add('active');
+        // ==================== ФИЛЬТР ИНБОКСА ====================
+        document.querySelectorAll('#inboxFilterBar .filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                currentFilter = this.dataset.filter;
+                document.querySelectorAll('#inboxFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                renderInbox();
             });
-            document.querySelector('.tab-2026')?.classList.add('active');
-            window.addEventListener('resize', resizeCanvas);
-            setInterval(saveState, 30000);
+        });
+
+        // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+        window.addEventListener('load', () => {
+            loadTheme();
+            loadState();
+            renderAll();
         });
     </script>
 </body>
 </html>
-
-
