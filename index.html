@@ -994,6 +994,7 @@
         let saveTimeout = null;
         let currentTheme = 'light';
         let currentPage = 'today'; // 'today' | 'dashboard' | 'inbox'
+        let inboxSortable = null; // экземпляр Sortable для инбокса
 
         // ==================== ТЕМА ====================
         function toggleTheme() {
@@ -1273,9 +1274,23 @@
         function renderInbox() {
             const list = document.getElementById('inboxList');
             if (!list) return;
+
+            // Уничтожаем предыдущий Sortable
+            if (inboxSortable) {
+                inboxSortable.destroy();
+                inboxSortable = null;
+            }
+
             list.innerHTML = '';
+
             const filtered = masterTasks.filter(t => currentFilter === 'all' || t.category === currentFilter);
-            filtered.forEach((task, idx) => {
+
+            if (filtered.length === 0) {
+                list.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:16px;">Нет задач в этой категории</div>';
+                return;
+            }
+
+            filtered.forEach((task) => {
                 const realIdx = masterTasks.indexOf(task);
                 const div = document.createElement('div');
                 div.className = 'list-item';
@@ -1289,7 +1304,9 @@
                 `;
                 list.appendChild(div);
             });
-            new Sortable(list, {
+
+            // Создаём новый Sortable
+            inboxSortable = new Sortable(list, {
                 group: 'shared',
                 animation: 150,
                 onEnd: function(evt) {
@@ -1300,6 +1317,12 @@
         }
 
         function addInboxTask() {
+            // Сбрасываем фильтр на "все", чтобы новая задача была видна
+            currentFilter = 'all';
+            document.querySelectorAll('#inboxFilterBar .filter-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.filter === 'all');
+            });
+
             masterTasks.push({ text: "Новая задача", category: "", important: false });
             renderInbox();
             const inputs = document.querySelectorAll('#inboxList input[type="text"]');
@@ -1319,7 +1342,6 @@
             renderInbox();
             saveState();
         }
-        // Новая функция переноса задачи из инбокса в задачи выбранного дня
         function moveToToday(idx) {
             const task = masterTasks.splice(idx, 1)[0];
             const dayData = getDateData(dailyDate);
