@@ -9,14 +9,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap&subset=cyrillic,cyrillic-ext" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-    <!-- PWA -->
     <link rel="manifest" href='data:application/manifest+json,{"name":"MYPLANER","short_name":"MYPLANER","theme_color":"%235c527f","background_color":"%23282633","display":"standalone","orientation":"portrait","icons":[{"src":"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20192%20192%22%3E%3Crect%20fill%3D%22%235c527f%22%20width%3D%22192%22%20height%3D%22192%22%2F%3E%3Cpath%20fill%3D%22white%22%20d%3D%22M96%2048c-12-8-32-12-48-12v100c16%200%2036%204%2048%2012%2012-8%2032-12%2048-12V36c-16%200-36%204-48%2012z%22%2F%3E%3C%2Fsvg%3E","sizes":"192x192","type":"image/svg+xml"}]}'>
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20192%20192%22%3E%3Crect%20fill%3D%22%235c527f%22%20width%3D%22192%22%20height%3D%22192%22%2F%3E%3Cpath%20fill%3D%22white%22%20d%3D%22M96%2048c-12-8-32-12-48-12v100c16%200%2036%204%2048%2012%2012-8%2032-12%2048-12V36c-16%200-36%204-48%2012z%22%2F%3E%3C%2Fsvg%3E">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="#5c527f">
     <style>
-        /* ===== ТЕМЫ ===== */
         :root {
             --bg-canvas: #282633;
             --tablet-bezel: #1b1a22;
@@ -48,6 +46,8 @@
             --tab-oct: #933256;
             --tab-nov: #6e2f54;
             --tab-dec: #2d4263;
+            --bottom-nav-height: 60px;
+            --fab-size: 56px;
         }
 
         [data-theme="dark"] {
@@ -80,7 +80,14 @@
             --tab-dec: #2a3a5a;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
         body {
             background-color: var(--bg-canvas);
             font-family: var(--font-ui);
@@ -105,64 +112,139 @@
         .nav-tab { transition: all 0.25s ease; }
 
         .app-controls {
-            display: flex; align-items: center; justify-content: space-between;
-            width: 100%; max-width: 1320px;
-            background: rgba(255,255,255,0.08); backdrop-filter: blur(14px);
-            padding: 10px 18px; border-radius: 16px; margin-bottom: 14px; color: #fff;
-            border: 1px solid rgba(255,255,255,0.12); flex-wrap: wrap; gap: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1320px;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(14px);
+            padding: 10px 18px;
+            border-radius: 16px;
+            margin-bottom: 14px;
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.12);
+            flex-wrap: wrap;
+            gap: 8px;
             transition: background 0.3s;
         }
         .brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-heading); font-weight: 700; font-size: 1.2rem; }
+        .brand i { font-size: 1.5rem; }
         .view-switchers { display: flex; background: rgba(0,0,0,0.35); padding: 4px; border-radius: 12px; gap: 4px; flex-wrap: wrap; }
         .view-btn {
-            background: transparent; border: none; color: #d0cee0; padding: 10px 18px; border-radius: 10px;
-            font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
-            display: flex; align-items: center; gap: 8px; font-family: var(--font-ui);
+            background: transparent;
+            border: none;
+            color: #d0cee0;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-ui);
         }
         .view-btn.active, .view-btn:hover { background: #fff; color: #1a1924; box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
         [data-theme="dark"] .view-btn.active, [data-theme="dark"] .view-btn:hover { background: var(--accent-purple); color: #fff; }
         .tool-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .btn-action {
-            background: rgba(255,255,255,0.14); border: none; color: #fff; padding: 10px 16px; border-radius: 10px;
-            cursor: pointer; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 6px;
-            font-family: var(--font-ui); transition: background 0.2s;
+            background: rgba(255,255,255,0.14);
+            border: none;
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-ui);
+            transition: background 0.2s;
         }
         .btn-action:hover { background: rgba(255,255,255,0.24); }
         .btn-action:active { transform: scale(0.96); }
 
         .tablet-container {
-            position: relative; width: 100%; max-width: 1320px; background-color: var(--tablet-bezel);
-            border-radius: 34px; padding: 14px; box-shadow: 0 25px 60px var(--shadow-color), inset 0 0 0 2px rgba(255,255,255,0.1);
-            display: flex; flex-direction: column; overflow: hidden;
+            position: relative;
+            width: 100%;
+            max-width: 1320px;
+            background-color: var(--tablet-bezel);
+            border-radius: 34px;
+            padding: 14px;
+            box-shadow: 0 25px 60px var(--shadow-color), inset 0 0 0 2px rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
             transition: background 0.3s, box-shadow 0.3s;
         }
         .tablet-top-bar {
-            min-height: 50px; background: var(--topbar-bg); border-radius: 20px 20px 0 0; display: flex; align-items: center;
-            justify-content: space-between; padding: 0 18px; color: #c5c3d0; font-size: 0.9rem;
-            border-bottom: 1px solid rgba(255,255,255,0.06); flex-wrap: wrap; gap: 6px;
+            min-height: 50px;
+            background: var(--topbar-bg);
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 18px;
+            color: #c5c3d0;
+            font-size: 0.9rem;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            flex-wrap: wrap;
+            gap: 6px;
             transition: background 0.3s;
         }
         .tablet-nav-icons { display: flex; align-items: center; gap: 18px; font-size: 1.1rem; }
         .tablet-nav-icons i { cursor: pointer; transition: color 0.2s; padding: 6px; }
         .tablet-nav-icons i:hover { color: #fff; }
 
-        .planner-workspace { display: flex; background: #201f29; border-radius: 0 0 20px 20px; overflow: hidden; min-height: 760px; transition: background 0.3s; }
+        .planner-workspace {
+            display: flex;
+            background: #201f29;
+            border-radius: 0 0 20px 20px;
+            overflow: hidden;
+            min-height: 760px;
+            transition: background 0.3s;
+        }
         [data-theme="dark"] .planner-workspace { background: #14141a; }
         .paper-viewport {
-            flex: 1; background: var(--paper-bg); position: relative; overflow-y: auto;
-            max-height: 850px; box-shadow: inset 0 0 12px rgba(0,0,0,0.06);
+            flex: 1;
+            background: var(--paper-bg);
+            position: relative;
+            overflow-y: auto;
+            max-height: 850px;
+            box-shadow: inset 0 0 12px rgba(0,0,0,0.06);
             transition: background 0.3s;
         }
 
         .tabs-sidebar {
-            width: 56px; background: var(--tab-bg); display: flex; flex-direction: column; gap: 2px; padding: 8px 0;
+            width: 56px;
+            background: var(--tab-bg);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 8px 0;
             transition: background 0.3s;
         }
         .nav-tab {
-            width: 100%; height: 50px; display: flex; align-items: center; justify-content: center; color: #fff;
-            font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; writing-mode: vertical-rl; text-transform: uppercase;
-            cursor: pointer; border-radius: 8px 0 0 8px; margin-left: 4px; transition: all 0.2s;
-            box-shadow: -2px 1px 4px rgba(0,0,0,0.3); opacity: 0.88;
+            width: 100%;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            writing-mode: vertical-rl;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 8px 0 0 8px;
+            margin-left: 4px;
+            transition: all 0.2s;
+            box-shadow: -2px 1px 4px rgba(0,0,0,0.3);
+            opacity: 0.88;
         }
         .nav-tab:hover, .nav-tab.active { opacity: 1; margin-left: 0; width: 52px; box-shadow: -4px 2px 8px rgba(0,0,0,0.4); }
         .nav-tab.tab-jan { background: var(--tab-jan); }
@@ -181,200 +263,531 @@
         .planner-page { display: none; padding: 28px 32px; min-height: 100%; position: relative; z-index: 1; }
         .planner-page.active { display: block; }
 
-        /* Общие стили для списков */
         .list-container { display: flex; flex-direction: column; gap: 6px; min-height: 50px; }
         .list-item {
-            display: flex; align-items: center; gap: 10px; background: var(--card-bg);
-            border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 12px;
-            transition: background 0.3s, border-color 0.3s; cursor: grab;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 6px 12px;
+            transition: background 0.3s, border-color 0.3s, transform 0.2s;
+            cursor: grab;
+            position: relative;
         }
         .list-item:active { cursor: grabbing; }
-        .list-item .custom-checkbox { width: 20px; height: 20px; border: 2px solid var(--text-muted); border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; background: var(--card-bg); flex-shrink: 0; }
-        .list-item .custom-checkbox.checked { background: #528c61; border-color: #528c61; color: #fff; }
-        .list-item .custom-checkbox.checked::after { content: '\f00c'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 0.8rem; }
-        .list-item input[type="text"] {
-            flex: 1; border: none; background: transparent; font-family: var(--font-handwriting);
-            font-size: 1.4rem; color: var(--text-dark); outline: none;
-            user-select: text; -webkit-user-select: text; transition: color 0.3s;
+        .list-item .custom-checkbox {
+            width: 28px;
+            height: 28px;
+            border: 2px solid var(--text-muted);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--card-bg);
+            flex-shrink: 0;
+            transition: all 0.2s;
         }
-        .list-item .delete-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1rem; }
+        .list-item .custom-checkbox.checked { background: #528c61; border-color: #528c61; color: #fff; }
+        .list-item .custom-checkbox.checked::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 0.8rem;
+        }
+        .list-item input[type="text"] {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-family: var(--font-handwriting);
+            font-size: 1.4rem;
+            color: var(--text-dark);
+            outline: none;
+            user-select: text;
+            -webkit-user-select: text;
+            transition: color 0.3s;
+            min-width: 0;
+        }
+        .list-item .delete-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 6px;
+        }
         .list-item .delete-btn:hover { color: #c0392b; }
-        .list-item .star { cursor: pointer; color: var(--text-muted); }
+        .list-item .star { cursor: pointer; color: var(--text-muted); font-size: 1.2rem; padding: 6px; }
         .list-item .star.active { color: #f1c40f; }
 
         .add-btn {
-            background: var(--accent-purple); color: #fff; border: none; padding: 8px 16px;
-            border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600;
-            display: inline-flex; align-items: center; gap: 6px; margin-top: 8px;
+            background: var(--accent-purple);
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
             font-family: var(--font-ui);
+            transition: background 0.2s;
         }
+        .add-btn:hover { background: #4b4268; }
 
-        .category-tag { font-size: 0.7rem; padding: 2px 8px; border-radius: 12px; background: var(--block-bg); color: var(--text-muted); font-weight: 600; }
+        .category-tag {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: var(--block-bg);
+            color: var(--text-muted);
+            font-weight: 600;
+            white-space: nowrap;
+        }
 
         .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
         .filter-btn {
-            padding: 6px 16px; border: 2px solid var(--border-color); border-radius: 20px;
-            background: transparent; cursor: pointer; font-size: 0.8rem; font-weight: 600;
-            color: var(--text-muted); transition: all 0.2s; font-family: var(--font-ui);
+            padding: 6px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            background: transparent;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            font-family: var(--font-ui);
         }
         .filter-btn.active { background: var(--accent-purple); color: #fff; border-color: var(--accent-purple); }
 
         .calendar-day-indicator { position: relative; }
         .calendar-day-indicator::after {
-            content: ''; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
-            width: 5px; height: 5px; background: var(--accent-purple); border-radius: 50%;
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 5px;
+            height: 5px;
+            background: var(--accent-purple);
+            border-radius: 50%;
         }
 
-        /* Стили для календаря */
         .calendar-header {
-            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
             margin-bottom: 8px;
         }
         .calendar-header button {
-            background: var(--accent-purple); color: #fff; border: none; border-radius: 6px;
-            padding: 5px 10px; cursor: pointer; font-size: 0.9rem;
+            background: var(--accent-purple);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
         }
         .calendar-header button:hover { background: #4b4268; }
         .calendar-header .month-year {
-            font-family: var(--font-heading); font-weight: 700; font-size: 1.1rem;
-            text-transform: uppercase; letter-spacing: 1px; color: var(--text-dark);
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-dark);
         }
         .quick-buttons { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
         .quick-buttons button {
-            background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px;
-            padding: 4px 12px; cursor: pointer; font-size: 0.8rem; font-weight: 600;
-            color: var(--text-dark); transition: all 0.2s; font-family: var(--font-ui);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 4px 12px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            transition: all 0.2s;
+            font-family: var(--font-ui);
         }
         .quick-buttons button:hover { background: var(--accent-purple); color: #fff; border-color: var(--accent-purple); }
 
-        /* Стили для погоды и цитат */
         .weather-card {
-            background: var(--card-bg); border: 1px solid var(--border-color);
-            border-radius: 12px; padding: 16px; margin-bottom: 16px;
-            display: flex; align-items: center; gap: 15px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             transition: background 0.3s, border-color 0.3s;
+            flex-wrap: wrap;
         }
         .weather-icon { font-size: 2.5rem; }
-        .weather-info { flex: 1; }
+        .weather-info { flex: 1; min-width: 0; }
         .weather-temp { font-family: var(--font-heading); font-size: 1.8rem; font-weight: 700; }
         .weather-desc { font-family: var(--font-handwriting); font-size: 1.3rem; color: var(--text-muted); }
         .weather-update-btn {
-            background: none; border: none; color: var(--text-muted); cursor: pointer;
-            font-size: 1.2rem; padding: 8px; border-radius: 50%; transition: background 0.2s;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.2s;
+            flex-shrink: 0;
         }
         .weather-update-btn:hover { background: rgba(0,0,0,0.08); }
 
         .quote-block {
-            background: var(--card-bg); border: 1px solid var(--border-color);
-            border-radius: 12px; padding: 16px; margin-bottom: 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             transition: background 0.3s, border-color 0.3s;
         }
         .quote-text {
-            font-family: var(--font-handwriting); font-size: 1.8rem; line-height: 1.4;
-            color: var(--text-dark); margin-bottom: 8px;
+            font-family: var(--font-handwriting);
+            font-size: 1.8rem;
+            line-height: 1.4;
+            color: var(--text-dark);
+            margin-bottom: 8px;
         }
         .quote-author { font-family: var(--font-ui); font-size: 0.9rem; color: var(--text-muted); font-style: italic; }
 
-        /* Стили дашборда */
         .dashboard-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;
-            background: var(--paper-bg); padding: 24px; border-radius: 8px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            background: var(--paper-bg);
+            padding: 24px;
+            border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1), inset 0 0 0 1px var(--paper-line);
         }
         .dashboard-block { background: var(--card-bg); border-radius: 12px; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .dashboard-block h3 {
-            font-family: var(--font-heading); font-size: 1.1rem; text-transform: uppercase;
-            letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px;
-            border-bottom: 2px solid var(--paper-line); padding-bottom: 6px;
+            font-family: var(--font-heading);
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            border-bottom: 2px solid var(--paper-line);
+            padding-bottom: 6px;
         }
         .dashboard-item { display: flex; align-items: center; gap: 10px; padding: 4px 0; }
-        .dashboard-item .custom-checkbox { width: 22px; height: 22px; border: 2px solid var(--text-muted); border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; background: var(--card-bg); flex-shrink: 0; }
+        .dashboard-item .custom-checkbox {
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--text-muted);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--card-bg);
+            flex-shrink: 0;
+        }
         .dashboard-item .custom-checkbox.checked { background: #528c61; border-color: #528c61; color: #fff; }
-        .dashboard-item .custom-checkbox.checked::after { content: '\f00c'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 0.8rem; }
+        .dashboard-item .custom-checkbox.checked::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 0.8rem;
+        }
 
         .weather-quote-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
         }
 
-        /* Аккордеон инбокса */
-        .inbox-toggle-btn {
+        /* ========== НОВЫЕ КОМПОНЕНТЫ ========== */
+
+        /* Бургер-меню */
+        .burger-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
             display: none;
-            background: var(--accent-purple); color: #fff; border: none; padding: 8px 16px;
-            border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600;
-            align-items: center; gap: 6px; margin-top: 8px;
+            padding: 8px;
         }
+        .mobile-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            display: none;
+            justify-content: flex-end;
+        }
+        .mobile-menu {
+            width: 250px;
+            height: 100%;
+            background: var(--topbar-bg);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.3);
+        }
+        .mobile-menu button {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1rem;
+            padding: 12px;
+            text-align: left;
+            cursor: pointer;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .mobile-menu button:hover { background: rgba(255,255,255,0.1); }
 
-        /* Нижняя панель для мобильных */
-        .mobile-quick-nav {
+        /* Нижняя навигация */
+        .bottom-nav {
             display: none;
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
+            height: var(--bottom-nav-height);
             background: var(--topbar-bg);
             backdrop-filter: blur(10px);
-            padding: 10px;
             z-index: 1000;
-            justify-content: center;
-            gap: 12px;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+            border-top: 1px solid rgba(255,255,255,0.1);
         }
-        .mobile-quick-nav button {
+        .bottom-nav-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            height: 100%;
+        }
+        .bottom-nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+            background: none;
+            border: none;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: color 0.2s;
+            height: 100%;
+            padding: 4px 0;
+        }
+        .bottom-nav-item i { font-size: 1.3rem; margin-bottom: 2px; }
+        .bottom-nav-item.active { color: #fff; }
+        .bottom-nav-item.active i { color: #fff; }
+
+        /* FAB */
+        .fab-btn {
+            display: none;
+            position: fixed;
+            right: 20px;
+            bottom: calc(var(--bottom-nav-height) + 20px);
+            width: var(--fab-size);
+            height: var(--fab-size);
+            border-radius: 50%;
             background: var(--accent-purple);
             color: #fff;
             border: none;
-            border-radius: 20px;
-            padding: 10px 20px;
-            font-size: 1rem;
-            font-weight: 600;
-            min-width: 90px;
+            font-size: 1.8rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            cursor: pointer;
+            z-index: 1100;
+            transition: transform 0.2s;
         }
+        .fab-btn:active { transform: scale(0.9); }
 
-        /* Адаптация под мобильные (iPhone) */
+        /* Bottom sheet для выбора блока */
+        .bottom-sheet-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1500;
+            display: none;
+            align-items: flex-end;
+        }
+        .bottom-sheet {
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .bottom-sheet h4 {
+            font-family: var(--font-heading);
+            margin-bottom: 16px;
+            text-align: center;
+            color: var(--text-dark);
+        }
+        .bottom-sheet-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .bottom-sheet-option {
+            background: var(--block-bg);
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            font-family: var(--font-ui);
+            font-weight: 600;
+            color: var(--text-dark);
+            text-align: center;
+            transition: background 0.2s;
+        }
+        .bottom-sheet-option:hover { background: var(--accent-purple); color: #fff; }
+
+        /* Модальное окно календаря */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 1200;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: var(--paper-bg);
+            border-radius: 20px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+        .modal-calendar-container .calendar-header { margin-bottom: 10px; }
+
+        /* Утилиты для мобильных */
         @media (max-width: 600px) {
-            .app-controls { flex-direction: column; align-items: stretch; }
-            .view-switchers { justify-content: center; }
-            .tool-actions { justify-content: center; }
-            .tablet-top-bar { flex-direction: column; height: auto; padding: 10px; }
-            .weather-card { flex-direction: column; align-items: flex-start; }
+            body { padding: 0; }
+            .app-controls {
+                margin: 0;
+                border-radius: 0;
+                padding: 8px 12px;
+                justify-content: space-between;
+                flex-wrap: nowrap;
+            }
+            .view-switchers, .tool-actions { display: none; }
+            .burger-btn { display: block; }
+            .tablet-container {
+                border-radius: 0;
+                padding: 0;
+                box-shadow: none;
+                margin: 0;
+            }
+            .tablet-top-bar {
+                border-radius: 0;
+                padding: 0 12px;
+                min-height: 40px;
+            }
+            .planner-workspace {
+                border-radius: 0;
+                min-height: calc(100vh - 100px);
+            }
+            .paper-viewport {
+                max-height: none;
+                height: calc(100vh - 100px);
+                border-radius: 0;
+            }
             .planner-page { padding: 12px; }
-            .tabs-sidebar { display: none; } /* скрываем сайдбар месяцев */
-            .paper-viewport { max-height: calc(100vh - 180px); } /* подстраиваем под мобильные */
-            .quick-buttons { display: none; } /* скрываем верхние кнопки */
-            .mobile-quick-nav { display: flex; } /* показываем нижнюю панель */
-            .inbox-toggle-btn { display: flex; } /* показываем кнопку аккордеона */
-            .inbox-wrapper { display: none; } /* по умолчанию скрыт */
-            .inbox-wrapper.open { display: block; } /* когда открыт */
+            .tabs-sidebar { display: none; }
+            .bottom-nav { display: block; }
+            .fab-btn { display: block; }
+            .quick-buttons { display: none; }
+            .weather-card { flex-direction: column; align-items: flex-start; }
+            .list-item { padding: 8px 12px; }
             .list-item input[type="text"] { font-size: 1.6rem; }
-            .list-item .custom-checkbox { width: 24px; height: 24px; }
+            .list-item .custom-checkbox { width: 30px; height: 30px; }
             .weather-temp { font-size: 2rem; }
             .quote-text { font-size: 1.6rem; }
             .dashboard-grid { grid-template-columns: 1fr; padding: 12px; }
             .weather-quote-grid { grid-template-columns: 1fr; }
             .dashboard-block { padding: 12px; }
+            .bottom-sheet-options { grid-template-columns: 1fr 1fr; }
+            .modal-content { padding: 15px; }
+            /* скрываем кнопки в списках на мобильном? */
+            .delete-btn, .star { font-size: 1.4rem; padding: 8px; }
         }
 
-        /* Для десктопа показываем инбокс всегда */
         @media (min-width: 601px) {
-            .inbox-wrapper { display: block !important; }
-            .inbox-toggle-btn { display: none; }
+            .bottom-nav, .fab-btn, .burger-btn, .mobile-menu-overlay { display: none; }
+            .inbox-wrapper { display: block; }
         }
     </style>
 </head>
 <body>
     <div class="app-controls">
         <div class="brand"><i class="fa-solid fa-book-open"></i><span>MYPLANER</span></div>
+        <button class="burger-btn" id="burgerBtn"><i class="fa-solid fa-bars"></i></button>
         <div class="view-switchers">
-            <button class="view-btn active" data-view="input"><i class="fa-solid fa-pen"></i> Ввод</button>
+            <button class="view-btn active" data-view="today"><i class="fa-solid fa-pen"></i> Сегодня</button>
             <button class="view-btn" data-view="dashboard"><i class="fa-solid fa-chart-simple"></i> Дашборд</button>
+            <button class="view-btn" data-view="inbox"><i class="fa-solid fa-inbox"></i> Инбокс</button>
         </div>
         <div class="tool-actions">
             <button class="btn-action" onclick="toggleTheme()" title="Переключить тему"><i id="themeIcon" class="fa-solid fa-moon"></i></button>
             <button class="btn-action" onclick="exportData()"><i class="fa-solid fa-download"></i> Экспорт</button>
             <button class="btn-action" onclick="document.getElementById('importFile').click()"><i class="fa-solid fa-upload"></i> Импорт</button>
             <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
+        </div>
+    </div>
+
+    <!-- Мобильное меню -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay">
+        <div class="mobile-menu">
+            <button onclick="toggleTheme()"><i class="fa-solid fa-moon"></i> Переключить тему</button>
+            <button onclick="exportData()"><i class="fa-solid fa-download"></i> Экспорт</button>
+            <button onclick="document.getElementById('importFile').click()"><i class="fa-solid fa-upload"></i> Импорт</button>
+            <button onclick="closeMobileMenu()"><i class="fa-solid fa-xmark"></i> Закрыть</button>
         </div>
     </div>
 
@@ -390,83 +803,52 @@
 
         <div class="planner-workspace">
             <div class="paper-viewport" id="paperViewport">
-                <!-- Страница ввода -->
-                <div class="planner-page active" id="pageInput">
-                    <div style="display:flex; gap:20px; flex-wrap: wrap;">
-                        <div style="flex:1; min-width:250px;">
-                            <h2 style="font-family:var(--font-heading); margin-bottom:12px;">Выберите дату</h2>
-                            <div id="inputCalendarContainer"></div>
-                            <!-- Кнопка аккордеона инбокса для мобильных -->
-                            <button class="inbox-toggle-btn" id="inboxToggleBtn" onclick="toggleInbox()">
-                                <i class="fa-solid fa-inbox"></i> Инбокс
-                            </button>
-                            <div class="inbox-wrapper" id="inboxWrapper">
-                                <div style="margin-top:20px;">
-                                    <h3 style="font-family:var(--font-heading); margin-bottom:8px;">Инбокс (входящие задачи)</h3>
-                                    <div class="filter-bar" id="inboxFilterBar">
-                                        <button class="filter-btn active" data-filter="all">Все</button>
-                                        <button class="filter-btn" data-filter="Работа">Работа</button>
-                                        <button class="filter-btn" data-filter="Дом">Дом</button>
-                                        <button class="filter-btn" data-filter="Личное">Личное</button>
-                                        <button class="filter-btn" data-filter="Звонки">Звонки</button>
-                                    </div>
-                                    <div id="inboxList" class="list-container"></div>
-                                    <button class="add-btn" onclick="addInboxTask()"><i class="fa-solid fa-plus"></i> Добавить задачу</button>
-                                </div>
+                <!-- Страница "Сегодня" (ввод) -->
+                <div class="planner-page active" id="pageToday">
+                    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+                        <h2 style="font-family:var(--font-heading); margin:0;" id="selectedDateTitle">Данные дня</h2>
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <button class="btn-action" style="background:var(--accent-purple); color:#fff; padding:6px 12px;" onclick="openCalendarModal()"><i class="fa-regular fa-calendar"></i> Календарь</button>
+                            <div class="quick-buttons" style="margin:0;">
+                                <button onclick="changeDay(-1)">Вчера</button>
+                                <button onclick="changeDay(0)">Сегодня</button>
+                                <button onclick="changeDay(1)">Завтра</button>
                             </div>
                         </div>
-                        <div style="flex:2; min-width:300px;">
-                            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
-                                <h2 style="font-family:var(--font-heading); margin-bottom:12px;" id="selectedDateTitle">Данные дня</h2>
-                                <!-- Верхние кнопки для десктопа (скрываются на мобильных) -->
-                                <div class="quick-buttons">
-                                    <button onclick="changeDay(-1)">Вчера</button>
-                                    <button onclick="changeDay(0)">Сегодня</button>
-                                    <button onclick="changeDay(1)">Завтра</button>
-                                </div>
-                            </div>
-                            <!-- Блок погоды -->
-                            <div class="weather-card">
-                                <div class="weather-icon" id="weatherIcon">🌤</div>
-                                <div class="weather-info">
-                                    <div class="weather-temp" id="weatherTemp">—</div>
-                                    <div class="weather-desc" id="weatherDesc">Погода не определена</div>
-                                </div>
-                                <button class="weather-update-btn" onclick="getWeather(false)" title="Обновить погоду"><i class="fa-solid fa-rotate"></i></button>
-                            </div>
-                            <!-- Блоки дня -->
-                            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:16px;">
-                                <div class="planner-block" style="border:1px solid var(--border-color); border-radius:8px; padding:12px;">
-                                    <div class="block-title">ЗАДАЧИ ДНЯ</div>
-                                    <div id="dayTasksList" class="list-container"></div>
-                                    <button class="add-btn" onclick="addDayTask('tasks')"><i class="fa-solid fa-plus"></i></button>
-                                </div>
-                                <div class="planner-block" style="border:1px solid var(--border-color); border-radius:8px; padding:12px;">
-                                    <div class="block-title">ГЛАВНЫЙ ФОКУС</div>
-                                    <div id="focusList" class="list-container"></div>
-                                    <button class="add-btn" onclick="addDayTask('focus')"><i class="fa-solid fa-plus"></i></button>
-                                </div>
-                                <div class="planner-block" style="border:1px solid var(--border-color); border-radius:8px; padding:12px;">
-                                    <div class="block-title">ЗВОНКИ И ПИСЬМА</div>
-                                    <div id="callsList" class="list-container"></div>
-                                    <button class="add-btn" onclick="addDayTask('calls')"><i class="fa-solid fa-plus"></i></button>
-                                </div>
-                                <div class="planner-block" style="border:1px solid var(--border-color); border-radius:8px; padding:12px;">
-                                    <div class="block-title">ТРЕКЕР ПРИВЫЧЕК</div>
-                                    <div id="habitsList" class="list-container"></div>
-                                    <button class="add-btn" onclick="addDayTask('habits')"><i class="fa-solid fa-plus"></i></button>
-                                </div>
-                                <div class="planner-block" style="border:1px solid var(--border-color); border-radius:8px; padding:12px;">
-                                    <div class="block-title">НЕ ЗАБЫТЬ</div>
-                                    <div id="personalList" class="list-container"></div>
-                                    <button class="add-btn" onclick="addDayTask('personal')"><i class="fa-solid fa-plus"></i></button>
-                                </div>
-                            </div>
+                    </div>
+                    <div class="weather-card">
+                        <div class="weather-icon" id="weatherIcon">🌤</div>
+                        <div class="weather-info">
+                            <div class="weather-temp" id="weatherTemp">—</div>
+                            <div class="weather-desc" id="weatherDesc">Погода не определена</div>
+                        </div>
+                        <button class="weather-update-btn" onclick="getWeather(false)" title="Обновить погоду"><i class="fa-solid fa-rotate"></i></button>
+                    </div>
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:16px;">
+                        <div class="planner-block" style="border:1px solid var(--border-color); border-radius:8px; padding:12px;">
+                            <div class="block-title" style="font-weight:bold; margin-bottom:8px;">ЗАДАЧИ ДНЯ</div>
+                            <div id="dayTasksList" class="list-container"></div>
+                        </div>
+                        <div class="planner-block" style="border:1px solid var(--border-color); border-radius:8px; padding:12px;">
+                            <div class="block-title" style="font-weight:bold; margin-bottom:8px;">ГЛАВНЫЙ ФОКУС</div>
+                            <div id="focusList" class="list-container"></div>
+                        </div>
+                        <div class="planner-block" style="border:1px solid var(--border-color); border-radius:8px; padding:12px;">
+                            <div class="block-title" style="font-weight:bold; margin-bottom:8px;">ЗВОНКИ И ПИСЬМА</div>
+                            <div id="callsList" class="list-container"></div>
+                        </div>
+                        <div class="planner-block" style="border:1px solid var(--border-color); border-radius:8px; padding:12px;">
+                            <div class="block-title" style="font-weight:bold; margin-bottom:8px;">ТРЕКЕР ПРИВЫЧЕК</div>
+                            <div id="habitsList" class="list-container"></div>
+                        </div>
+                        <div class="planner-block" style="border:1px solid var(--border-color); border-radius:8px; padding:12px;">
+                            <div class="block-title" style="font-weight:bold; margin-bottom:8px;">НЕ ЗАБЫТЬ</div>
+                            <div id="personalList" class="list-container"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Страница дашборда -->
+                <!-- Страница "Дашборд" -->
                 <div class="planner-page" id="pageDashboard">
                     <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
                         <h2 style="font-family:var(--font-heading);">Дашборд дня</h2>
@@ -476,13 +858,27 @@
                             <button onclick="changeDay(1)">Завтра</button>
                         </div>
                     </div>
-                    <!-- Мини-календарь -->
-                    <div id="dashboardCalendarContainer" style="margin-bottom:20px;"></div>
                     <div id="dashboardContent"></div>
+                </div>
+
+                <!-- Страница "Инбокс" -->
+                <div class="planner-page" id="pageInbox">
+                    <div style="margin-top:20px;">
+                        <h3 style="font-family:var(--font-heading); margin-bottom:8px;">Инбокс (входящие задачи)</h3>
+                        <div class="filter-bar" id="inboxFilterBar">
+                            <button class="filter-btn active" data-filter="all">Все</button>
+                            <button class="filter-btn" data-filter="Работа">Работа</button>
+                            <button class="filter-btn" data-filter="Дом">Дом</button>
+                            <button class="filter-btn" data-filter="Личное">Личное</button>
+                            <button class="filter-btn" data-filter="Звонки">Звонки</button>
+                        </div>
+                        <div id="inboxList" class="list-container"></div>
+                        <button class="add-btn" onclick="addInboxTask()"><i class="fa-solid fa-plus"></i> Добавить задачу</button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Сайдбар месяцев (только для десктопа) -->
+            <!-- Сайдбар месяцев (desktop) -->
             <div class="tabs-sidebar">
                 <div class="nav-tab tab-jan" data-month="0" onclick="switchToMonth(0)">ЯНВ</div>
                 <div class="nav-tab tab-feb" data-month="1" onclick="switchToMonth(1)">ФЕВ</div>
@@ -500,19 +896,45 @@
         </div>
     </div>
 
-    <!-- Нижняя панель для мобильных -->
-    <div class="mobile-quick-nav" id="mobileQuickNav">
-        <button onclick="changeDay(-1)">Вчера</button>
-        <button onclick="changeDay(0)">Сегодня</button>
-        <button onclick="changeDay(1)">Завтра</button>
+    <!-- Модальное окно календаря -->
+    <div class="modal-overlay" id="calendarModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeCalendarModal()"><i class="fa-solid fa-xmark"></i></button>
+            <div id="modalCalendarContainer" class="modal-calendar-container"></div>
+        </div>
     </div>
+
+    <!-- FAB и bottom sheet -->
+    <button class="fab-btn" id="fabBtn"><i class="fa-solid fa-plus"></i></button>
+    <div class="bottom-sheet-overlay" id="bottomSheetOverlay">
+        <div class="bottom-sheet">
+            <h4>Добавить задачу</h4>
+            <div class="bottom-sheet-options">
+                <button class="bottom-sheet-option" onclick="chooseBlockAndAdd('tasks')">📋 Задача</button>
+                <button class="bottom-sheet-option" onclick="chooseBlockAndAdd('focus')">🎯 Фокус</button>
+                <button class="bottom-sheet-option" onclick="chooseBlockAndAdd('calls')">📞 Звонок</button>
+                <button class="bottom-sheet-option" onclick="chooseBlockAndAdd('habits')">✅ Привычка</button>
+                <button class="bottom-sheet-option" onclick="chooseBlockAndAdd('personal')">📌 Не забыть</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Нижняя навигация -->
+    <div class="bottom-nav">
+        <div class="bottom-nav-inner">
+            <button class="bottom-nav-item active" data-page="today"><i class="fa-solid fa-pen"></i><span>Сегодня</span></button>
+            <button class="bottom-nav-item" data-page="dashboard"><i class="fa-solid fa-chart-simple"></i><span>Дашборд</span></button>
+            <button class="bottom-nav-item" data-page="inbox"><i class="fa-solid fa-inbox"></i><span>Инбокс</span></button>
+        </div>
+    </div>
+
+    <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
 
     <script>
         // ==================== КОНСТАНТЫ ====================
         const MONTHS_RU = ['ЯНВ','ФЕВ','МАР','АПР','МАЙ','ИЮН','ИЮЛ','АВГ','СЕН','ОКТ','НОЯ','ДЕК'];
         const MONTHS_FULL_RU = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
         const DAYS_RU = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
-        const CATEGORIES = ['Работа', 'Дом', 'Личное', 'Звонки'];
         const QUOTES = [
             { text: "Неудача — это просто возможность начать снова, но уже более мудро", author: "Генри Форд" },
             { text: "Успех — это способность идти от поражения к поражению, не теряя энтузиазма", author: "Уинстон Черчилль" },
@@ -551,11 +973,12 @@
         let dailyDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
         let viewYear = dailyDate.getFullYear();
         let viewMonth = dailyDate.getMonth();
-        let masterTasks = []; // { text, category, important }
-        let dataByDate = {}; // { "YYYY-MM-DD": { tasks: [], focus: [], calls: [], habits: [], personal: [], weather: "" } }
+        let masterTasks = [];
+        let dataByDate = {};
         let currentFilter = 'all';
         let saveTimeout = null;
         let currentTheme = 'light';
+        let currentPage = 'today'; // 'today' | 'dashboard' | 'inbox'
 
         // ==================== ТЕМА ====================
         function toggleTheme() {
@@ -576,7 +999,7 @@
         // ==================== ЗАГРУЗКА / СОХРАНЕНИЕ ====================
         function loadState() {
             try {
-                const saved = localStorage.getItem('planner2026_state_v2');
+                const saved = localStorage.getItem('planner2026_state_v3');
                 if (saved) {
                     const state = JSON.parse(saved);
                     masterTasks = state.masterTasks || [];
@@ -598,7 +1021,7 @@
                     dailyDate: dailyDate.toISOString(),
                     currentFilter
                 };
-                localStorage.setItem('planner2026_state_v2', JSON.stringify(state));
+                localStorage.setItem('planner2026_state_v3', JSON.stringify(state));
             } catch(e) { console.warn('Ошибка сохранения', e); }
         }
         function saveState() {
@@ -639,24 +1062,44 @@
             return dataByDate[key];
         }
         function renderAll() {
-            renderCalendar('inputCalendarContainer');
-            renderCalendar('dashboardCalendarContainer', true);
-            renderInbox();
-            renderDayBlocks();
+            renderTodayPage();
             renderDashboard();
+            renderInbox();
+            renderMonthTabs();
             saveState();
         }
 
+        // ==================== ПЕРЕКЛЮЧЕНИЕ СТРАНИЦ ====================
+        function showPage(page) {
+            currentPage = page;
+            document.querySelectorAll('.planner-page').forEach(p => p.classList.remove('active'));
+            document.getElementById(page === 'today' ? 'pageToday' : page === 'dashboard' ? 'pageDashboard' : 'pageInbox').classList.add('active');
+            // Обновляем верхние кнопки и нижнюю навигацию
+            document.querySelectorAll('.view-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.view === page);
+            });
+            document.querySelectorAll('.bottom-nav-item').forEach(b => {
+                b.classList.toggle('active', b.dataset.page === page);
+            });
+            // Дополнительные действия при переключении
+            if (page === 'dashboard') {
+                const todayKey = formatDateKey(new Date());
+                const selectedKey = formatDateKey(dailyDate);
+                if (todayKey === selectedKey && !getDateData(dailyDate).weather) {
+                    getWeather(true);
+                }
+                renderDashboard();
+            }
+        }
+
         // ==================== КАЛЕНДАРЬ ====================
-        function renderCalendar(containerId, isMini = false) {
-            const container = document.getElementById(containerId);
-            if (!container) return;
+        function renderCalendar(container, isMini = false, isModal = false) {
             const year = viewYear;
             const month = viewMonth;
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             const isActiveMonth = dailyDate.getMonth() === month && dailyDate.getFullYear() === year;
-            const activeDay = isActiveMonth ? dailyDate.getDate() : 0; // если не активный месяц, не подсвечиваем
+            const activeDay = isActiveMonth ? dailyDate.getDate() : 0;
             let html = `<div class="calendar-header">
                             <button onclick="shiftMonth(-1)"><i class="fa-solid fa-angle-left"></i></button>
                             <span class="month-year">${MONTHS_FULL_RU[month]} ${year}</span>
@@ -678,13 +1121,20 @@
             }
             html += '</tr></tbody></table>';
             container.innerHTML = html;
-            if (containerId === 'inputCalendarContainer') {
-                document.getElementById('selectedDateTitle').textContent = `${dailyDate.getDate()} ${MONTHS_FULL_RU[dailyDate.getMonth()]} ${dailyDate.getFullYear()}`;
-            }
-            document.querySelectorAll('.tabs-sidebar .nav-tab').forEach(tab => {
-                tab.classList.remove('active');
-                if (parseInt(tab.dataset.month) === month && year === dailyDate.getFullYear()) tab.classList.add('active');
-            });
+        }
+
+        function renderTodayPage() {
+            renderCalendar(document.getElementById('modalCalendarContainer'), false, true);
+            document.getElementById('selectedDateTitle').textContent = `${dailyDate.getDate()} ${MONTHS_FULL_RU[dailyDate.getMonth()]} ${dailyDate.getFullYear()}`;
+            renderDayBlocks();
+        }
+
+        function openCalendarModal() {
+            document.getElementById('calendarModal').style.display = 'flex';
+            renderCalendar(document.getElementById('modalCalendarContainer'), false, true);
+        }
+        function closeCalendarModal() {
+            document.getElementById('calendarModal').style.display = 'none';
         }
 
         function shiftMonth(delta) {
@@ -698,12 +1148,14 @@
             viewYear = dailyDate.getFullYear();
             viewMonth = dailyDate.getMonth();
             renderAll();
+            closeCalendarModal();
         }
         function selectDay(day, month, year) {
             dailyDate = new Date(year, month, day);
             viewYear = year;
             viewMonth = month;
             renderAll();
+            closeCalendarModal();
         }
         function switchToMonth(monthIdx) {
             viewMonth = monthIdx;
@@ -721,9 +1173,99 @@
             renderAll();
         }
 
-        // ==================== ИНБОКС (МАСТЕР-СПИСОК) ====================
+        function renderMonthTabs() {
+            document.querySelectorAll('.tabs-sidebar .nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (parseInt(tab.dataset.month) === viewMonth) tab.classList.add('active');
+            });
+        }
+
+        // ==================== ДНЕВНЫЕ БЛОКИ ====================
+        function renderDayBlocks() {
+            const dayData = getDateData(dailyDate);
+            renderList('dayTasksList', dayData.tasks, 'tasks');
+            renderList('focusList', dayData.focus, 'focus');
+            renderList('callsList', dayData.calls, 'calls');
+            renderList('habitsList', dayData.habits, 'habits');
+            renderList('personalList', dayData.personal, 'personal');
+            updateWeatherDisplay(dayData.weather);
+        }
+
+        function renderList(containerId, items, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            items.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.dataset.index = idx;
+                div.innerHTML = `
+                    <div class="custom-checkbox ${item.checked ? 'checked' : ''}" onclick="toggleItem('${type}', ${idx})"></div>
+                    <input type="text" value="${item.text}" onchange="updateItemText('${type}', ${idx}, this.value)">
+                    <button class="delete-btn" onclick="deleteItem('${type}', ${idx})"><i class="fa-solid fa-xmark"></i></button>
+                `;
+                container.appendChild(div);
+            });
+            new Sortable(container, {
+                group: 'shared',
+                animation: 150,
+                onEnd: function(evt) {
+                    updateDayDataFromDOM();
+                    renderAll();
+                }
+            });
+        }
+
+        function addDayTask(type) {
+            const dayData = getDateData(dailyDate);
+            dayData[type].push({ text: "Новая задача", checked: false });
+            renderDayBlocks();
+            renderDashboard();
+            saveState();
+            // Фокус на новом инпуте
+            const containerId = type === 'tasks' ? 'dayTasksList' : type === 'focus' ? 'focusList' : type === 'calls' ? 'callsList' : type === 'habits' ? 'habitsList' : 'personalList';
+            const inputs = document.querySelectorAll(`#${containerId} input[type="text"]`);
+            if (inputs.length) inputs[inputs.length-1].focus();
+        }
+        function toggleItem(type, idx) {
+            const dayData = getDateData(dailyDate);
+            dayData[type][idx].checked = !dayData[type][idx].checked;
+            renderDayBlocks();
+            renderDashboard();
+            saveState();
+        }
+        function updateItemText(type, idx, val) {
+            const dayData = getDateData(dailyDate);
+            dayData[type][idx].text = val;
+            saveState();
+        }
+        function deleteItem(type, idx) {
+            const dayData = getDateData(dailyDate);
+            dayData[type].splice(idx, 1);
+            renderDayBlocks();
+            renderDashboard();
+            saveState();
+        }
+        function updateDayDataFromDOM() {
+            const dayData = getDateData(dailyDate);
+            const types = ['tasks', 'focus', 'calls', 'habits', 'personal'];
+            types.forEach(type => {
+                const containerId = type === 'tasks' ? 'dayTasksList' : type === 'focus' ? 'focusList' : type === 'calls' ? 'callsList' : type === 'habits' ? 'habitsList' : 'personalList';
+                const container = document.getElementById(containerId);
+                const items = container.querySelectorAll('.list-item');
+                const newArr = [];
+                items.forEach(item => {
+                    const text = item.querySelector('input').value;
+                    const checked = item.querySelector('.custom-checkbox').classList.contains('checked');
+                    newArr.push({ text, checked });
+                });
+                dayData[type] = newArr;
+            });
+        }
+
+        // ==================== ИНБОКС ====================
         function renderInbox() {
             const list = document.getElementById('inboxList');
+            if (!list) return;
             list.innerHTML = '';
             const filtered = masterTasks.filter(t => currentFilter === 'all' || t.category === currentFilter);
             filtered.forEach((task, idx) => {
@@ -779,90 +1321,6 @@
                 newMaster.push({ text, category, important });
             });
             masterTasks = newMaster;
-        }
-
-        // ==================== АККОРДЕОН ИНБОКСА ====================
-        function toggleInbox() {
-            const wrapper = document.getElementById('inboxWrapper');
-            wrapper.classList.toggle('open');
-        }
-
-        // ==================== ДНЕВНЫЕ БЛОКИ ====================
-        function renderDayBlocks() {
-            const dayData = getDateData(dailyDate);
-            renderList('dayTasksList', dayData.tasks, 'tasks');
-            renderList('focusList', dayData.focus, 'focus');
-            renderList('callsList', dayData.calls, 'calls');
-            renderList('habitsList', dayData.habits, 'habits');
-            renderList('personalList', dayData.personal, 'personal');
-            updateWeatherDisplay(dayData.weather);
-        }
-
-        function renderList(containerId, items, type) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-            items.forEach((item, idx) => {
-                const div = document.createElement('div');
-                div.className = 'list-item';
-                div.dataset.index = idx;
-                div.innerHTML = `
-                    <div class="custom-checkbox ${item.checked ? 'checked' : ''}" onclick="toggleItem('${type}', ${idx})"></div>
-                    <input type="text" value="${item.text}" onchange="updateItemText('${type}', ${idx}, this.value)">
-                    <button class="delete-btn" onclick="deleteItem('${type}', ${idx})"><i class="fa-solid fa-xmark"></i></button>
-                `;
-                container.appendChild(div);
-            });
-            new Sortable(container, {
-                group: 'shared',
-                animation: 150,
-                onEnd: function(evt) {
-                    updateDayDataFromDOM();
-                    renderAll();
-                }
-            });
-        }
-
-        function addDayTask(type) {
-            const dayData = getDateData(dailyDate);
-            dayData[type].push({ text: "Новая задача", checked: false });
-            renderDayBlocks();
-            saveState();
-        }
-        function toggleItem(type, idx) {
-            const dayData = getDateData(dailyDate);
-            dayData[type][idx].checked = !dayData[type][idx].checked;
-            const containerId = type === 'tasks' ? 'dayTasksList' : type === 'focus' ? 'focusList' : type === 'calls' ? 'callsList' : type === 'habits' ? 'habitsList' : 'personalList';
-            const container = document.getElementById(containerId);
-            const checkboxes = container.querySelectorAll('.custom-checkbox');
-            checkboxes[idx].classList.toggle('checked');
-            saveState();
-        }
-        function updateItemText(type, idx, val) {
-            const dayData = getDateData(dailyDate);
-            dayData[type][idx].text = val;
-            saveState();
-        }
-        function deleteItem(type, idx) {
-            const dayData = getDateData(dailyDate);
-            dayData[type].splice(idx, 1);
-            renderDayBlocks();
-            saveState();
-        }
-        function updateDayDataFromDOM() {
-            const dayData = getDateData(dailyDate);
-            const types = ['tasks', 'focus', 'calls', 'habits', 'personal'];
-            types.forEach(type => {
-                const containerId = type === 'tasks' ? 'dayTasksList' : type === 'focus' ? 'focusList' : type === 'calls' ? 'callsList' : type === 'habits' ? 'habitsList' : 'personalList';
-                const container = document.getElementById(containerId);
-                const items = container.querySelectorAll('.list-item');
-                const newArr = [];
-                items.forEach(item => {
-                    const text = item.querySelector('input').value;
-                    const checked = item.querySelector('.custom-checkbox').classList.contains('checked');
-                    newArr.push({ text, checked });
-                });
-                dayData[type] = newArr;
-            });
         }
 
         // ==================== ПОГОДА ====================
@@ -940,6 +1398,7 @@
         // ==================== ДАШБОРД ====================
         function renderDashboard() {
             const container = document.getElementById('dashboardContent');
+            if (!container) return;
             const dayData = getDateData(dailyDate);
             container.innerHTML = '';
             const topBlock = document.createElement('div');
@@ -967,27 +1426,40 @@
             grid.innerHTML = `
                 <div class="dashboard-block">
                     <h3>Задачи дня</h3>
-                    ${renderDashboardList(dayData.tasks)}
+                    ${renderDashboardList(dayData.tasks, 'tasks')}
                 </div>
                 <div class="dashboard-block">
                     <h3>Главный фокус</h3>
-                    ${renderDashboardList(dayData.focus)}
+                    ${renderDashboardList(dayData.focus, 'focus')}
                 </div>
                 <div class="dashboard-block">
                     <h3>Звонки и письма</h3>
-                    ${renderDashboardList(dayData.calls)}
+                    ${renderDashboardList(dayData.calls, 'calls')}
                 </div>
                 <div class="dashboard-block">
                     <h3>Трекер привычек</h3>
-                    ${renderDashboardList(dayData.habits)}
+                    ${renderDashboardList(dayData.habits, 'habits')}
                 </div>
                 <div class="dashboard-block">
                     <h3>Не забыть</h3>
-                    ${renderDashboardList(dayData.personal)}
+                    ${renderDashboardList(dayData.personal, 'personal')}
                 </div>
             `;
             container.appendChild(grid);
             renderRandomQuote();
+
+            // Добавляем обработчики для чекбоксов на дашборде
+            document.querySelectorAll('#dashboardContent .custom-checkbox').forEach((cb, idx) => {
+                cb.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const type = this.dataset.type;
+                    const itemIdx = this.dataset.index;
+                    const dayData = getDateData(dailyDate);
+                    dayData[type][itemIdx].checked = !dayData[type][itemIdx].checked;
+                    this.classList.toggle('checked');
+                    saveState();
+                });
+            });
         }
 
         function getWeatherIcon(weatherStr) {
@@ -1002,55 +1474,84 @@
             return '🌤';
         }
 
-        function renderDashboardList(items) {
+        function renderDashboardList(items, type) {
             if (!items || items.length === 0) return '<div style="color:var(--text-muted);">Пусто</div>';
-            return items.map(item => `
+            return items.map((item, idx) => `
                 <div class="dashboard-item">
-                    <div class="custom-checkbox ${item.checked ? 'checked' : ''}" onclick="event.stopPropagation(); this.classList.toggle('checked');"></div>
+                    <div class="custom-checkbox ${item.checked ? 'checked' : ''}" data-type="${type}" data-index="${idx}"></div>
                     <span style="font-family:var(--font-handwriting); font-size:1.2rem;">${item.text}</span>
                 </div>
             `).join('');
         }
 
-        // ==================== ПЕРЕКЛЮЧЕНИЕ ВИДОВ ====================
-        function switchView(view) {
-            document.querySelectorAll('.planner-page').forEach(p => p.classList.remove('active'));
-            document.getElementById(view === 'input' ? 'pageInput' : 'pageDashboard').classList.add('active');
-            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector(`.view-btn[data-view="${view}"]`).classList.add('active');
-            if (view === 'dashboard') {
-                const todayKey = formatDateKey(new Date());
-                const selectedKey = formatDateKey(dailyDate);
-                if (todayKey === selectedKey) {
-                    const dayData = getDateData(dailyDate);
-                    if (!dayData.weather) {
-                        getWeather(true);
-                    }
-                }
-                renderDashboard();
-            }
-        }
+        // ==================== НИЖНЯЯ НАВИГАЦИЯ И FAB ====================
+        document.querySelectorAll('.bottom-nav-item').forEach(btn => {
+            btn.addEventListener('click', function() {
+                showPage(this.dataset.page);
+            });
+        });
         document.querySelectorAll('.view-btn').forEach(btn => {
-            btn.addEventListener('click', () => switchView(btn.dataset.view));
+            btn.addEventListener('click', function() {
+                showPage(this.dataset.view);
+            });
         });
 
-        // Свайп для переключения
+        const fabBtn = document.getElementById('fabBtn');
+        const bottomSheetOverlay = document.getElementById('bottomSheetOverlay');
+        fabBtn.addEventListener('click', function() {
+            bottomSheetOverlay.style.display = 'flex';
+        });
+        bottomSheetOverlay.addEventListener('click', function(e) {
+            if (e.target === bottomSheetOverlay) {
+                bottomSheetOverlay.style.display = 'none';
+            }
+        });
+
+        function chooseBlockAndAdd(type) {
+            bottomSheetOverlay.style.display = 'none';
+            addDayTask(type);
+        }
+
+        // Мобильное меню
+        const burgerBtn = document.getElementById('burgerBtn');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+        burgerBtn.addEventListener('click', function() {
+            mobileMenuOverlay.style.display = 'flex';
+        });
+        function closeMobileMenu() {
+            mobileMenuOverlay.style.display = 'none';
+        }
+        mobileMenuOverlay.addEventListener('click', function(e) {
+            if (e.target === mobileMenuOverlay) closeMobileMenu();
+        });
+
+        // ==================== СВАЙПЫ ====================
         let touchStartX = 0;
-        document.getElementById('paperViewport').addEventListener('touchstart', e => {
+        let touchStartY = 0;
+        const paperViewport = document.getElementById('paperViewport');
+        paperViewport.addEventListener('touchstart', e => {
             touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
         }, { passive: true });
-        document.getElementById('paperViewport').addEventListener('touchend', e => {
+        paperViewport.addEventListener('touchend', e => {
             const deltaX = e.changedTouches[0].clientX - touchStartX;
-            if (Math.abs(deltaX) > 80) {
-                if (deltaX < 0) switchView('dashboard');
-                else switchView('input');
+            const deltaY = e.changedTouches[0].clientY - touchStartY;
+            if (Math.abs(deltaX) > 80 && Math.abs(deltaY) < 40) {
+                if (currentPage === 'today') {
+                    if (deltaX < 0) changeDay(1);
+                    else changeDay(-1);
+                } else if (currentPage === 'dashboard') {
+                    // На дашборде свайп тоже меняет день
+                    if (deltaX < 0) changeDay(1);
+                    else changeDay(-1);
+                }
             }
         });
 
         // ==================== ЭКСПОРТ / ИМПОРТ ====================
         function exportData() {
             saveStateSync();
-            const state = localStorage.getItem('planner2026_state_v2');
+            const state = localStorage.getItem('planner2026_state_v3');
             const blob = new Blob([state], {type: 'application/json'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1066,7 +1567,7 @@
             reader.onload = (e) => {
                 try {
                     const data = JSON.parse(e.target.result);
-                    localStorage.setItem('planner2026_state_v2', JSON.stringify(data));
+                    localStorage.setItem('planner2026_state_v3', JSON.stringify(data));
                     location.reload();
                 } catch(err) { alert('Ошибка импорта'); }
             };
@@ -1088,6 +1589,7 @@
             loadTheme();
             loadState();
             renderAll();
+            showPage('today');
         });
     </script>
 </body>
