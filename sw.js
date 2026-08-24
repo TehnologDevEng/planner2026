@@ -1,4 +1,4 @@
-const CACHE_NAME = 'myplanner-v1';
+const CACHE_NAME = 'myplanner-v2';
 const ASSETS = [
     './',
     './index.html',
@@ -14,7 +14,23 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('fetch', event => {
-    event.respondWith(
-        caches.match(event.request).then(response => response || fetch(event.request))
-    );
+    const url = new URL(event.request.url);
+
+    // Для API погоды используем network-first
+    if (url.hostname === 'api.open-meteo.com') {
+        event.respondWith(
+            fetch(event.request)
+                .then(response => {
+                    const clone = response.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+                    return response;
+                })
+                .catch(() => caches.match(event.request))
+        );
+    } else {
+        // Для остальных ресурсов — cache-first
+        event.respondWith(
+            caches.match(event.request).then(response => response || fetch(event.request))
+        );
+    }
 });
