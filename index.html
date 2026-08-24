@@ -3,12 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Цифровой Планер 2026</title>
+    <title>MYPLANER</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap&subset=cyrillic,cyrillic-ext" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <!-- PWA -->
+    <link rel="manifest" href='data:application/manifest+json,{"name":"MYPLANER","short_name":"MYPLANER","theme_color":"%235c527f","background_color":"%23282633","display":"standalone","orientation":"portrait","icons":[{"src":"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20192%20192%22%3E%3Crect%20fill%3D%22%235c527f%22%20width%3D%22192%22%20height%3D%22192%22%2F%3E%3Cpath%20fill%3D%22white%22%20d%3D%22M96%2048c-12-8-32-12-48-12v100c16%200%2036%204%2048%2012%2012-8%2032-12%2048-12V36c-16%200-36%204-48%2012z%22%2F%3E%3C%2Fsvg%3E","sizes":"192x192","type":"image/svg+xml"}]}'>
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20192%20192%22%3E%3Crect%20fill%3D%22%235c527f%22%20width%3D%22192%22%20height%3D%22192%22%2F%3E%3Cpath%20fill%3D%22white%22%20d%3D%22M96%2048c-12-8-32-12-48-12v100c16%200%2036%204%2048%2012%2012-8%2032-12%2048-12V36c-16%200-36%204-48%2012z%22%2F%3E%3C%2Fsvg%3E">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#5c527f">
     <style>
         /* ===== ТЕМЫ ===== */
         :root {
@@ -292,25 +298,74 @@
             display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;
         }
 
-        @media (max-width: 1024px) {
-            .paper-viewport { max-height: none; }
-            .tabs-sidebar { width: 48px; }
-            .nav-tab { height: 44px; font-size: 0.65rem; }
-            .planner-page { padding: 18px; }
-            .weather-quote-grid { grid-template-columns: 1fr; }
+        /* Аккордеон инбокса */
+        .inbox-toggle-btn {
+            display: none;
+            background: var(--accent-purple); color: #fff; border: none; padding: 8px 16px;
+            border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600;
+            align-items: center; gap: 6px; margin-top: 8px;
         }
+
+        /* Нижняя панель для мобильных */
+        .mobile-quick-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--topbar-bg);
+            backdrop-filter: blur(10px);
+            padding: 10px;
+            z-index: 1000;
+            justify-content: center;
+            gap: 12px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+        }
+        .mobile-quick-nav button {
+            background: var(--accent-purple);
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            min-width: 90px;
+        }
+
+        /* Адаптация под мобильные (iPhone) */
         @media (max-width: 600px) {
             .app-controls { flex-direction: column; align-items: stretch; }
             .view-switchers { justify-content: center; }
             .tool-actions { justify-content: center; }
             .tablet-top-bar { flex-direction: column; height: auto; padding: 10px; }
             .weather-card { flex-direction: column; align-items: flex-start; }
+            .planner-page { padding: 12px; }
+            .tabs-sidebar { display: none; } /* скрываем сайдбар месяцев */
+            .paper-viewport { max-height: calc(100vh - 180px); } /* подстраиваем под мобильные */
+            .quick-buttons { display: none; } /* скрываем верхние кнопки */
+            .mobile-quick-nav { display: flex; } /* показываем нижнюю панель */
+            .inbox-toggle-btn { display: flex; } /* показываем кнопку аккордеона */
+            .inbox-wrapper { display: none; } /* по умолчанию скрыт */
+            .inbox-wrapper.open { display: block; } /* когда открыт */
+            .list-item input[type="text"] { font-size: 1.6rem; }
+            .list-item .custom-checkbox { width: 24px; height: 24px; }
+            .weather-temp { font-size: 2rem; }
+            .quote-text { font-size: 1.6rem; }
+            .dashboard-grid { grid-template-columns: 1fr; padding: 12px; }
+            .weather-quote-grid { grid-template-columns: 1fr; }
+            .dashboard-block { padding: 12px; }
+        }
+
+        /* Для десктопа показываем инбокс всегда */
+        @media (min-width: 601px) {
+            .inbox-wrapper { display: block !important; }
+            .inbox-toggle-btn { display: none; }
         }
     </style>
 </head>
 <body>
     <div class="app-controls">
-        <div class="brand"><i class="fa-solid fa-book-open"></i><span>ПЛАНЕР 2026</span></div>
+        <div class="brand"><i class="fa-solid fa-book-open"></i><span>MYPLANER</span></div>
         <div class="view-switchers">
             <button class="view-btn active" data-view="input"><i class="fa-solid fa-pen"></i> Ввод</button>
             <button class="view-btn" data-view="dashboard"><i class="fa-solid fa-chart-simple"></i> Дашборд</button>
@@ -341,29 +396,36 @@
                         <div style="flex:1; min-width:250px;">
                             <h2 style="font-family:var(--font-heading); margin-bottom:12px;">Выберите дату</h2>
                             <div id="inputCalendarContainer"></div>
-                            <div style="margin-top:20px;">
-                                <h3 style="font-family:var(--font-heading); margin-bottom:8px;">Инбокс (входящие задачи)</h3>
-                                <div class="filter-bar" id="inboxFilterBar">
-                                    <button class="filter-btn active" data-filter="all">Все</button>
-                                    <button class="filter-btn" data-filter="Работа">Работа</button>
-                                    <button class="filter-btn" data-filter="Дом">Дом</button>
-                                    <button class="filter-btn" data-filter="Личное">Личное</button>
-                                    <button class="filter-btn" data-filter="Звонки">Звонки</button>
+                            <!-- Кнопка аккордеона инбокса для мобильных -->
+                            <button class="inbox-toggle-btn" id="inboxToggleBtn" onclick="toggleInbox()">
+                                <i class="fa-solid fa-inbox"></i> Инбокс
+                            </button>
+                            <div class="inbox-wrapper" id="inboxWrapper">
+                                <div style="margin-top:20px;">
+                                    <h3 style="font-family:var(--font-heading); margin-bottom:8px;">Инбокс (входящие задачи)</h3>
+                                    <div class="filter-bar" id="inboxFilterBar">
+                                        <button class="filter-btn active" data-filter="all">Все</button>
+                                        <button class="filter-btn" data-filter="Работа">Работа</button>
+                                        <button class="filter-btn" data-filter="Дом">Дом</button>
+                                        <button class="filter-btn" data-filter="Личное">Личное</button>
+                                        <button class="filter-btn" data-filter="Звонки">Звонки</button>
+                                    </div>
+                                    <div id="inboxList" class="list-container"></div>
+                                    <button class="add-btn" onclick="addInboxTask()"><i class="fa-solid fa-plus"></i> Добавить задачу</button>
                                 </div>
-                                <div id="inboxList" class="list-container"></div>
-                                <button class="add-btn" onclick="addInboxTask()"><i class="fa-solid fa-plus"></i> Добавить задачу</button>
                             </div>
                         </div>
                         <div style="flex:2; min-width:300px;">
                             <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
                                 <h2 style="font-family:var(--font-heading); margin-bottom:12px;" id="selectedDateTitle">Данные дня</h2>
+                                <!-- Верхние кнопки для десктопа (скрываются на мобильных) -->
                                 <div class="quick-buttons">
                                     <button onclick="changeDay(-1)">Вчера</button>
                                     <button onclick="changeDay(0)">Сегодня</button>
                                     <button onclick="changeDay(1)">Завтра</button>
                                 </div>
                             </div>
-                            <!-- Блок погоды (заметный, над остальными) -->
+                            <!-- Блок погоды -->
                             <div class="weather-card">
                                 <div class="weather-icon" id="weatherIcon">🌤</div>
                                 <div class="weather-info">
@@ -420,6 +482,7 @@
                 </div>
             </div>
 
+            <!-- Сайдбар месяцев (только для десктопа) -->
             <div class="tabs-sidebar">
                 <div class="nav-tab tab-jan" data-month="0" onclick="switchToMonth(0)">ЯНВ</div>
                 <div class="nav-tab tab-feb" data-month="1" onclick="switchToMonth(1)">ФЕВ</div>
@@ -435,6 +498,13 @@
                 <div class="nav-tab tab-dec" data-month="11" onclick="switchToMonth(11)">ДЕК</div>
             </div>
         </div>
+    </div>
+
+    <!-- Нижняя панель для мобильных -->
+    <div class="mobile-quick-nav" id="mobileQuickNav">
+        <button onclick="changeDay(-1)">Вчера</button>
+        <button onclick="changeDay(0)">Сегодня</button>
+        <button onclick="changeDay(1)">Завтра</button>
     </div>
 
     <script>
@@ -585,9 +655,8 @@
             const month = viewMonth;
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const activeDay = dailyDate.getDate() + (dailyDate.getMonth() === month && dailyDate.getFullYear() === year ? 0 : 0);
-            // активный день только если выбранный день в этом месяце
             const isActiveMonth = dailyDate.getMonth() === month && dailyDate.getFullYear() === year;
+            const activeDay = isActiveMonth ? dailyDate.getDate() : 0; // если не активный месяц, не подсвечиваем
             let html = `<div class="calendar-header">
                             <button onclick="shiftMonth(-1)"><i class="fa-solid fa-angle-left"></i></button>
                             <span class="month-year">${MONTHS_FULL_RU[month]} ${year}</span>
@@ -609,11 +678,9 @@
             }
             html += '</tr></tbody></table>';
             container.innerHTML = html;
-            // Обновляем заголовок выбранной даты (только для страницы ввода)
             if (containerId === 'inputCalendarContainer') {
                 document.getElementById('selectedDateTitle').textContent = `${dailyDate.getDate()} ${MONTHS_FULL_RU[dailyDate.getMonth()]} ${dailyDate.getFullYear()}`;
             }
-            // Подсветка активного месяца в сайдбаре
             document.querySelectorAll('.tabs-sidebar .nav-tab').forEach(tab => {
                 tab.classList.remove('active');
                 if (parseInt(tab.dataset.month) === month && year === dailyDate.getFullYear()) tab.classList.add('active');
@@ -639,7 +706,6 @@
             renderAll();
         }
         function switchToMonth(monthIdx) {
-            // Устанавливаем месяц, год остаётся текущим (viewYear)
             viewMonth = monthIdx;
             dailyDate = new Date(viewYear, monthIdx, 1);
             renderAll();
@@ -713,6 +779,12 @@
                 newMaster.push({ text, category, important });
             });
             masterTasks = newMaster;
+        }
+
+        // ==================== АККОРДЕОН ИНБОКСА ====================
+        function toggleInbox() {
+            const wrapper = document.getElementById('inboxWrapper');
+            wrapper.classList.toggle('open');
         }
 
         // ==================== ДНЕВНЫЕ БЛОКИ ====================
@@ -850,9 +922,6 @@
                 updateWeatherDisplay(weatherStr);
                 saveState();
                 renderDashboard();
-                if (!silent) {
-                    // показать уведомление? можно просто алерт
-                }
             } catch(err) {
                 console.warn(err);
                 if (!silent) alert('Не удалось получить погоду. Введите вручную.');
@@ -873,7 +942,6 @@
             const container = document.getElementById('dashboardContent');
             const dayData = getDateData(dailyDate);
             container.innerHTML = '';
-            // Верхний блок: погода + цитата
             const topBlock = document.createElement('div');
             topBlock.className = 'weather-quote-grid';
             topBlock.innerHTML = `
@@ -894,7 +962,6 @@
                 </div>
             `;
             container.appendChild(topBlock);
-            // Остальные блоки
             const grid = document.createElement('div');
             grid.className = 'dashboard-grid';
             grid.innerHTML = `
@@ -920,7 +987,6 @@
                 </div>
             `;
             container.appendChild(grid);
-            // Заполняем цитату
             renderRandomQuote();
         }
 
@@ -953,16 +1019,15 @@
             document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
             document.querySelector(`.view-btn[data-view="${view}"]`).classList.add('active');
             if (view === 'dashboard') {
-                // Автоматическое определение погоды для сегодняшнего дня
                 const todayKey = formatDateKey(new Date());
                 const selectedKey = formatDateKey(dailyDate);
                 if (todayKey === selectedKey) {
                     const dayData = getDateData(dailyDate);
                     if (!dayData.weather) {
-                        getWeather(true); // тихий вызов
+                        getWeather(true);
                     }
                 }
-                renderDashboard(); // рендерим с новой цитатой
+                renderDashboard();
             }
         }
         document.querySelectorAll('.view-btn').forEach(btn => {
